@@ -1,226 +1,163 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:orientation="vertical"
-	android:background="@android:color/transparent"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+package https.socks.android.util;
 
-	<android.support.v7.widget.CardView
-		android:id="@+id/background"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginLeft="10.0dip"
-		android:layout_marginRight="10.0dip"
-		android:layout_centerHorizontal="true"
-		android:layout_centerVertical="true"
-		app:cardBackgroundColor="@color/white"
-		app:cardCornerRadius="10.0dip"
-		app:cardElevation="16.0dip"
-		app:cardUseCompatPadding="true">
+import android.util.Base64;
+import android.util.Log;
+import android.widget.Toast;
+import https.socks.android.util.Ror;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import https.socks.android.SocksHttpMainActivity; 
 
-		<RelativeLayout
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content">
+public final class Ror { 
+    private static final String AES_MODE = "AES/CBC/PKCS7Padding"; 
+    private static final String CHARSET = "UTF-8"; 
+    public static boolean DEBUG_LOG_ENABLED = false; 
+    private static final String HASH_ALGORITHM = "SHA-256"; 
+    private static final String TAG = "Ror"; 
+    private static final byte[] ivBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    private static final String vars = "4paZ4paa4pab4pac4pad4pae4paf4paD4paE4paF4paG4paH4paI4paJ4paK4paQ"; 
 
-			<RelativeLayout
-				android:id="@+id/relativelayout1"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content">
+    private static SecretKeySpec generateKey(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException { 
+        MessageDigest instance = MessageDigest.getInstance(HASH_ALGORITHM); 
+        byte[] bytes = str.getBytes(CHARSET); 
+        instance.update(bytes, 0, bytes.length); 
+        byte[] digest = instance.digest(); 
+        log("SHA-256 key ", digest); 
+        return new SecretKeySpec(digest, "AES"); 
+    } 
 
-				<View
-					android:layout_width="fill_parent"
-					android:layout_height="100.0dip"/>
+    public static String encrypt(String str, String str2, String str3) throws GeneralSecurityException { 
+        String genUser = genUser(str); 
+        try { 
+            SecretKeySpec generateKey = generateKey(new StringBuffer().append(genUser).append(genKey(str2)).toString()); 
+            log("message", str3); 
+            genUser = Base64.encodeToString(encrypt(generateKey, ivBytes, str3.getBytes(CHARSET)), 2); 
+            log("Base64.NO_WRAP", genUser); 
+            return genCode(genUser); 
+        } catch (UnsupportedEncodingException e) { 
+            if (DEBUG_LOG_ENABLED) { 
+                Log.e(TAG, "UnsupportedEncodingException ", e); 
+            } 
+            throw new GeneralSecurityException(e); 
+        } 
+    } 
 
-				<ImageView
-					android:id="@id/icon"
-					android:background="@drawable/c_edit"
-                    android:backgroundTint="@color/colorOpposite"
-					android:layout_width="50.0dip"
-					android:layout_height="50.0dip"
-					android:layout_centerHorizontal="true"
-					android:layout_centerVertical="true"/>
+    public static byte[] encrypt(SecretKeySpec secretKeySpec, byte[] bArr, byte[] bArr2) throws GeneralSecurityException { 
+        Cipher instance = Cipher.getInstance(AES_MODE); 
+        instance.init(1, secretKeySpec, new IvParameterSpec(bArr)); 
+        byte[] doFinal = instance.doFinal(bArr2); 
+        log("cipherText", doFinal); 
+        return doFinal; 
+    } 
 
-			</RelativeLayout>
+    public static String decrypt(String str, String str2, String str3) throws GeneralSecurityException { 
+        String genString = genString(str3); 
+        String genUser = genUser(str); 
+        try { 
+            SecretKeySpec generateKey = generateKey(new StringBuffer().append(genUser).append(genKey(str2)).toString()); 
+            log("base64EncodedCipherText", genString); 
+            byte[] decode = Base64.decode(genString, 2); 
+            log("decodedCipherText", decode); 
+            decode = decrypt(generateKey, ivBytes, decode); 
+            log("decryptedBytes", decode); 
+            genUser = new String(decode, CHARSET); 
+            log("message", genUser); 
+            return genUser; 
+        } catch (UnsupportedEncodingException e) { 
+            if (DEBUG_LOG_ENABLED) { 
+                Log.e(TAG, "UnsupportedEncodingException ", e); 
+            } 
+            throw new GeneralSecurityException(e); 
+        } 
+    } 
 
-			<RelativeLayout
-				android:paddingLeft="12.0dip"
-				android:paddingRight="12.0dip"
-				android:paddingBottom="10.0dip"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_below="@+id/relativelayout1">
+    public static byte[] decrypt(SecretKeySpec secretKeySpec, byte[] bArr, byte[] bArr2) throws GeneralSecurityException { 
+        Cipher instance = Cipher.getInstance(AES_MODE); 
+        instance.init(2, secretKeySpec, new IvParameterSpec(bArr)); 
+        byte[] doFinal = instance.doFinal(bArr2); 
+        log("decryptedBytes", doFinal); 
+        return doFinal; 
+    } 
 
-				<TextView
-					android:textSize="18.0dip"
-					android:textStyle="bold"
-					android:gravity="center"
-					android:id="@id/title"
-                    android:textColor="@color/colorOpposite"
-					android:paddingLeft="16.0dip"
-					android:paddingRight="16.0dip"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:text="Custom Tweak"
-					android:textAlignment="center"/>
+    private static void log(String str, byte[] bArr) { 
+        if (DEBUG_LOG_ENABLED) { 
+            Log.d(TAG, new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(str).append("[").toString()).append(bArr.length).toString()).append("] [").toString()).append(bytesToHex(bArr)).toString()).append("]").toString()); 
+        } 
+    } 
 
-				<TextView
-					android:textSize="14.0dip"
-					android:gravity="center"
-					android:id="@+id/message"
-					android:paddingLeft="16.0dip"
-                    android:textColor="@color/colorOpposite"
-					android:paddingRight="16.0dip"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="14.0dip"
-					android:text="Enter your own tweak details"
-					android:layout_below="@id/title"
-					android:textAlignment="center"/>
+    private static void log(String str, String str2) { 
+        if (DEBUG_LOG_ENABLED) { 
+            Log.d(TAG, new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(str).append("[").toString()).append(str2.length()).toString()).append("] [").toString()).append(str2).toString()).append("]").toString()); 
+        } 
+    } 
 
-				<LinearLayout
-					android:orientation="vertical"
-					android:id="@+id/main"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="10.0dip"
-					android:layout_below="@+id/message">
+    private static String bytesToHex(byte[] bArr) { 
+        char[] cArr = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}; 
+        char[] cArr2 = new char[(bArr.length * 2)]; 
+        for (int i = 0; i < bArr.length; i++) { 
+            int i2 = bArr[i] & 255; 
+            cArr2[i * 2] = cArr[i2 >>> 4]; 
+            cArr2[(i * 2) + 1] = cArr[i2 & 15]; 
+        } 
+        return new String(cArr2); 
+    } 
 
-					<LinearLayout
-						android:layout_width="fill_parent"
-						android:layout_height="match_parent"
-						android:paddingLeft="?dialogPreferredPadding"
-						android:paddingRight="?dialogPreferredPadding"
-						android:orientation="vertical">
+    Ror() {} 
 
-						<LinearLayout
-							android:orientation="vertical"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content">
+    public static String genUser(String str) { 
+        return Base64.encodeToString(str.getBytes(), 0); 
+    } 
 
-							<TextView
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="Payload Name:"
-                                android:textSize="12.0dip"
-                                
-								android:textAppearance="?android:attr/textAppearanceSmall"
-								android:layout_marginTop="10dp"
-							
-								android:textColor="@color/colorOpposite"/>
+    public static String genKey(String str) { 
+        if (str != null) { 
+            return asHex(str.getBytes()); 
+        } 
+        throw new NullPointerException(); 
+    } 
 
-							<EditText
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-                                android:textSize="12.0dip"
-                                android:textColor="@color/colorOpposite"
-								android:maxLines="10"
-								android:id="@+id/add_payloadNameEditText"/>
+    private static String asHex(byte[] bArr) { 
+        char[] toCharArray = "0123456789ABCDEF".toCharArray(); 
+        StringBuilder stringBuilder = new StringBuilder(); 
+        for (byte b : bArr) { 
+            stringBuilder.append(toCharArray[(b & 240) >> 4]); 
+            stringBuilder.append(toCharArray[b & 15]); 
+        } 
+        return stringBuilder.toString(); 
+    } 
 
-						</LinearLayout>
+    public static String genCode(String str) { 
+        if (str != null) { 
+            return gen(str.getBytes()); 
+        } 
+        throw new NullPointerException(); 
+    } 
 
-						<LinearLayout
-							android:orientation="vertical"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content">
+    private static String gen(byte[] bArr) { 
+        char[] toCharArray = var(vars).toCharArray(); 
+        StringBuilder stringBuilder = new StringBuilder(); 
+        for (byte b : bArr) { 
+            stringBuilder.append(toCharArray[(b & 240) >> 4]); 
+            stringBuilder.append(toCharArray[b & 15]); 
+        } 
+        return stringBuilder.toString(); 
+    } 
 
-							<TextView
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="Payload Text:"
-                                android:textSize="12.0dip"
-								android:textAppearance="?android:attr/textAppearanceSmall"
-								android:layout_marginTop="10dp"
-				
-								android:textColor="@color/colorOpposite"/>
+    public static String var(String str) { 
+        return new String(Base64.decode(str, 0)); 
+    } 
 
-							<EditText
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-                                android:textSize="12.0dip"
-                                android:textColor="@color/colorOpposite"
-								android:maxLines="5"
-								android:id="@+id/add_myHTTPEditText"/>
-
-							<LinearLayout
-								android:orientation="horizontal"
-								android:layout_width="fill_parent"
-								android:layout_height="wrap_content"
-								android:layout_marginTop="30.0dip"
-								android:weightSum="100.0"
-								android:layout_below="@+id/main">
-
-								<android.support.v7.widget.CardView
-									android:gravity="center"
-									android:id="@+id/negativeBtn"
-									android:clickable="true"
-									android:layout_width="fill_parent"
-									android:layout_height="70.0dip"
-									android:foreground="?selectableItemBackground"
-									android:layout_weight="50.0"
-									android:layout_centerHorizontal="true"
-									android:shape="ring"
-									android:thicknessRatio="1.9"
-									android:innerRadius="0.0dip"
-									android:elevation="5.0dip"
-									app:cardBackgroundColor="@color/colorPrimary"
-									app:cardCornerRadius="25.0dip"
-									app:cardUseCompatPadding="true">
-
-									<TextView
-										android:textSize="15.0dip"
-										android:textColor="@color/colorOpposite"
-										android:layout_gravity="center"
-										android:id="@+id/gen"
-										android:gravity="center"
-                                        android:layout_width="fill_parent"
-										android:layout_height="wrap_content"
-										android:text="Generate"/>
-
-								</android.support.v7.widget.CardView>
-
-								<android.support.v7.widget.CardView
-									android:gravity="center"
-									android:id="@+id/saves"
-									android:clickable="true"
-									android:layout_width="fill_parent"
-									android:layout_height="70.0dip"
-									android:foreground="?selectableItemBackground"
-									android:layout_weight="50.0"
-									android:layout_centerHorizontal="true"
-									android:shape="ring"
-									android:thicknessRatio="1.9"
-									android:innerRadius="0.0dip"
-									android:elevation="5.0dip"
-									app:cardBackgroundColor="@color/colorPrimary"
-									app:cardCornerRadius="25.0dip"
-									app:cardUseCompatPadding="true">
-
-									<TextView
-										android:textSize="15.0dip"
-										android:textColor="@color/colorOpposite"
-										android:layout_gravity="center"
-										android:id="@+id/save"
-										android:gravity="center"
-                                        android:layout_width="fill_parent"
-										android:layout_height="wrap_content"
-										android:text="Save"/>
-
-								</android.support.v7.widget.CardView>
-
-							</LinearLayout>
-
-						</LinearLayout>
-
-					</LinearLayout>
-
-				</LinearLayout>
-
-			</RelativeLayout>
-
-		</RelativeLayout>
-
-    </android.support.v7.widget.CardView>
-
-</RelativeLayout>
+    public static String genString(String str) { 
+        String var = var(vars); 
+        char[] toCharArray = str.toCharArray(); 
+        byte[] bArr = new byte[(str.length() / 2)]; 
+        for (int i = 0; i < bArr.length; i++) { 
+            bArr[i] = (byte) (((var.indexOf(toCharArray[i * 2]) * 16) + var.indexOf(toCharArray[(i * 2) + 1])) & 255); 
+        } 
+        return new String(bArr); 
+    } 
+  }
