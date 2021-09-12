@@ -1,470 +1,373 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:orientation="vertical"
+	android:background="@android:color/transparent"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	style="@style/MainBg">
+	android:layout_height="fill_parent">
 
-	<LinearLayout
-		android:orientation="vertical"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-
-		<RelativeLayout
-			android:id="@+id/rlTop"
-			android:layout_width="fill_parent"
-			android:layout_height="140.0dip">
-
-			<RelativeLayout
-				android:orientation="vertical"
-				android:id="@+id/llTitle"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="12.0dip">
-
-				<ImageView
-					android:background="@drawable/bg_share"
-					android:padding="8.0dip"
-					android:layout_width="36.0dip"
-					android:layout_height="36.0dip"
-					android:scaleType="fitXY"
-					android:layout_centerVertical="true"
-					android:layout_marginStart="12.0dip"/>
-
-				<ImageView
-					android:onClick="a_drawer"
-					android:background="?selectableItemBackgroundBorderless"
-					android:padding="8.0dip"
-					android:layout_width="36.0dip"
-					android:layout_height="36.0dip"
-					android:src="@drawable/icons_menu"
-					android:scaleType="fitXY"
-					android:tint="@color/colorOpposite"
-					android:layout_centerVertical="true"
-					android:layout_marginStart="12.0dip"/>
-
-				<ImageView
-					android:background="@drawable/bg_share"
-					android:padding="8.0dip"
-					android:layout_width="36.0dip"
-					android:layout_height="36.0dip"
-					android:scaleType="fitXY"
-					android:layout_alignParentRight="true"
-					android:layout_centerVertical="true"
-					android:layout_marginEnd="12.0dip"/>
-
-				<ImageView
-					android:onClick="a_settings"
-					android:background="?selectableItemBackgroundBorderless"
-					android:padding="8.0dip"
-					android:layout_width="36.0dip"
-					android:layout_height="36.0dip"
-					android:src="@drawable/settings"
-					android:scaleType="fitXY"
-					android:tint="@color/colorOpposite"
-					android:layout_alignParentRight="true"
-					android:layout_centerVertical="true"
-					android:layout_marginEnd="12.0dip"/>
-
-				<LinearLayout
-					android:gravity="center"
-					android:layout_width="wrap_content"
-					android:layout_height="40.0dip"
-					android:layout_centerInParent="true">
-
-					<TextView
-						android:textSize="20.0sp"
-						android:textColor="@color/colorOpposite"
-						android:id="@+id/titletxt"
-						android:paddingBottom="2.0dip"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="Shield"/>
-
-					<TextView
-						android:textSize="20.0sp"
-						android:textColor="#ffb40404"
-						android:id="@+id/titletxt2"
-						android:paddingBottom="2.0dip"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="VPN"/>
-
-				</LinearLayout>
-
-			</RelativeLayout>
-
-		</RelativeLayout>
+	<android.support.v7.widget.CardView
+		android:id="@+id/background"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="10.0dip"
+		android:layout_marginRight="10.0dip"
+		android:layout_centerHorizontal="true"
+		android:layout_centerVertical="true"
+		app:cardBackgroundColor="@color/white"
+		app:cardCornerRadius="10.0dip"
+		app:cardElevation="16.0dip"
+		app:cardUseCompatPadding="true">
 
 		<RelativeLayout
-			android:id="@+id/rlMiddle"
-			android:layout_width="fill_parent"
-			android:layout_height="180.0dip"
-			android:layout_marginTop="-36.0dip"
-			android:layout_below="@+id/rlTop">
-
-			<LinearLayout
-				android:orientation="horizontal"
-				android:layout_width="fill_parent"
-				android:layout_height="52.0dip">
-
-				<LinearLayout
-					android:gravity="center"
-					android:orientation="vertical"
-					android:id="@+id/bytesout"
-					android:layout_width="0.0dip"
-					android:layout_height="fill_parent"
-					android:layout_weight="1.0">
-
-					<TextView
-						android:textSize="15.0sp"
-						android:textColor="@color/colorOpposite"
-						android:gravity="center"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="Upload"/>
-
-					<TextView
-						android:textSize="15.0sp"
-						android:textColor="@color/colorOpposite"
-						android:gravity="center"
-						android:id="@+id/bytes_out"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="0 B"/>
-
-				</LinearLayout>
-
-				<View
-					android:layout_width="0.0dip"
-					android:layout_height="wrap_content"
-					android:layout_weight="2.0"/>
-
-				<LinearLayout
-					android:gravity="center"
-					android:orientation="vertical"
-					android:id="@+id/dataIn"
-					android:layout_width="0.0dip"
-					android:layout_height="fill_parent"
-					android:layout_weight="1.0">
-
-					<TextView
-						android:textSize="15.0sp"
-						android:textColor="@color/colorOpposite"
-						android:gravity="center"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="Download"/>
-
-					<TextView
-						android:textSize="15.0sp"
-						android:textColor="@color/colorOpposite"
-						android:gravity="center"
-						android:id="@+id/bytes_in"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="0 B"/>
-
-				</LinearLayout>
-
-			</LinearLayout>
-
-			<ImageView
-				android:id="@+id/ivCurve"
-				android:layout_width="fill_parent"
-				android:layout_height="96.0dip"
-				android:src="@drawable/bottom_curve_light"
-				android:scaleType="fitXY"
-				android:tint="@color/white"
-				android:layout_centerHorizontal="true"/>
-
-			<RelativeLayout
-				android:background="@+color/white"
-				android:layout_width="fill_parent"
-				android:layout_height="fill_parent"
-				android:layout_marginTop="-5.0dip"
-				android:layout_below="@+id/ivCurve"/>
-
-			<RelativeLayout
-				android:id="@+id/relConnect"
-				android:layout_width="150.0dip"
-				android:layout_height="150.0dip"
-				android:layout_centerInParent="true"
-				style="@style/CircleBorderBg">
-
-				<https.socks.android.view.CircleImageView
-					android:id="@+id/ivPowerBack"
-					android:layout_width="fill_parent"
-					android:layout_height="fill_parent"
-					android:layout_margin="18.0dip"
-					style="@style/CircleBg"/>
-
-				<ImageView
-					android:id="@+id/activity_starterButtonMain"
-					android:paddingBottom="8.0dip"
-					android:layout_width="72.0dip"
-					android:layout_height="72.0dip"
-					android:src="@drawable/antenna_disconnect_light"
-					android:layout_centerInParent="true"
-					android:paddingStart="8.0dip"/>
-
-				<RelativeLayout
-					android:layout_width="56.0dip"
-					android:layout_height="56.0dip"
-					android:layout_marginTop="16.0dip">
-
-					<https.socks.android.view.CircleImageView
-						android:layout_width="fill_parent"
-						android:layout_height="fill_parent"
-						android:src="@color/white"/>
-
-					<https.socks.android.view.CircleImageView
-						android:id="@+id/civCenter"
-						android:layout_width="fill_parent"
-						android:layout_height="fill_parent"
-						android:layout_margin="20.0dip"/>
-
-					<https.socks.android.view.RipplePulseLayout
-						android:id="@+id/layout_ripplepulse"
-						android:clipChildren="true"
-						android:layout_width="fill_parent"
-						android:layout_height="fill_parent"
-						app:rippleColor="#ff14e61a"
-						app:rippleType="stroke"
-						app:startRadius="10.0dip"
-						app:endRadius="25.0dip"
-						app:duration="1800"
-						app:strokeWidth="2.0dip"/>
-
-					<ImageView
-						android:id="@+id/selectedCountry"
-						android:layout_width="fill_parent"
-						android:layout_height="fill_parent"
-						android:layout_margin="12.0dip"/>
-
-				</RelativeLayout>
-
-			</RelativeLayout>
-
-		</RelativeLayout>
-
-	</LinearLayout>
-
-	<LinearLayout
-		android:orientation="vertical"
-		android:background="@color/white"
-		android:paddingTop="15.0dip"
-		android:layout_width="fill_parent"
-		android:layout_height="100.0dip"
-		android:paddingStart="20.0dip"
-		android:paddingEnd="20.0dip">
-
-		<LinearLayout
-			android:layout_width="fill_parent"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content">
 
-			<TextView
-				android:textSize="18.0sp"
-				android:textColor="@color/colorOpposite"
-				android:gravity="center_horizontal"
-				android:id="@+id/connection_status"
-				android:layout_width="fill_parent"
+			<RelativeLayout
+				android:id="@+id/relativelayout1"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+
+				<View
+					android:layout_width="fill_parent"
+					android:layout_height="100.0dip"/>
+
+				<ImageView 
+					android:id="@id/icon"
+					android:background="@drawable/s_edit"
+                    android:backgroundTint="@color/colorOpposite"
+					android:layout_width="50.0dip"
+					android:layout_height="50.0dip"
+					android:layout_centerHorizontal="true"
+					android:layout_centerVertical="true"/>
+
+			</RelativeLayout>
+
+			<RelativeLayout
+				android:paddingLeft="12.0dip"
+				android:paddingRight="12.0dip"
+				android:paddingBottom="10.0dip"
+				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Tap to Connect"/>
+				android:layout_below="@+id/relativelayout1">
 
-		</LinearLayout>
+				<TextView
+					android:textSize="18.0dip"
+					android:textStyle="bold"
+					android:gravity="center"
+					android:id="@id/title"
+                    android:textColor="@color/colorOpposite"
+					android:paddingLeft="16.0dip"
+					android:paddingRight="16.0dip"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:text="Custom Server"
+					android:textAlignment="center"/>
 
-		<https.socks.android.util.Chronometer
-			android:textSize="14.0sp"
-			android:textColor="@color/colorOpposite"
-			android:layout_gravity="center_horizontal"
-			android:id="@+id/duration"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="8.0dip"
-			android:text="00h:00m:00s"/>
-
-	</LinearLayout>
-
-	<LinearLayout
-		android:orientation="vertical"
-		android:background="@color/white"
-		android:layout_width="fill_parent"
-		android:layout_height="50.0dip"
-		android:gravity="center">
-
-		<com.google.android.gms.ads.AdView
-			xmlns:ads="http://schemas.android.com/apk/res-auto"
-			android:id="@+id/adBannerMainView"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			ads:adSize="BANNER"
-			ads:adUnitId="ca-app-pub-7598967394813618/8167991179"
-			android:layout_gravity="center">
-
-		</com.google.android.gms.ads.AdView>
-
-	</LinearLayout>
-
-	<RelativeLayout
-		android:orientation="vertical"
-		android:background="@color/white"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-
-		<LinearLayout
-			android:layout_gravity="bottom"
-			android:orientation="vertical"
-			android:padding="10.0dip"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="55.0dip"
-			android:layout_alignParentBottom="true">
-
-			<LinearLayout
-				android:layout_width="fill_parent"
-				android:orientation="vertical"
-				android:layout_height="60.0dip"
-				android:layout_marginLeft="30.0dip"
-				android:layout_marginRight="30.0dip"
-				android:layout_marginBottom="20.0dip"
-				style="@style/SpinnerBg">
-
-				<Spinner
-					android:id="@+id/serverSpinner"
-					android:background="#00000000"
-					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					android:spinnerMode="dialog"/>
-
-			</LinearLayout>
-
-			<LinearLayout
-				android:layout_width="fill_parent"
-				android:orientation="vertical"
-				android:layout_height="60.0dip"
-				android:layout_marginLeft="30.0dip"
-				android:layout_marginRight="30.0dip"
-				android:layout_marginBottom="10.0dip"
-				style="@style/SpinnerBg">
-
-				<Spinner
-					android:id="@+id/payloadSpinner"
-					android:background="#00000000"
-					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					android:spinnerMode="dialog"/>
-
-			</LinearLayout>
-
-			<LinearLayout
-				xmlns:card_view="http://schemas.android.com/apk/res-auto"
-				android:id="@+id/timerLayout"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="30.0dip"
-				android:layout_marginRight="30.0dip"
-				android:foreground="?android:selectableItemBackground"
-				style="@style/SpinnerBg">
+				<TextView
+					android:textSize="14.0dip"
+					android:gravity="center"
+					android:id="@+id/message"
+					android:paddingLeft="16.0dip"
+                    android:textColor="@color/colorOpposite"
+					android:paddingRight="16.0dip"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="14.0dip"
+					android:text="Enter your private server details"
+					android:layout_below="@id/title"
+					android:textAlignment="center"/>
 
 				<LinearLayout
-					android:gravity="center"
-					android:orientation="horizontal"
-					android:id="@+id/timerlayout"
+					android:orientation="vertical"
+					android:id="@+id/main"
 					android:layout_width="fill_parent"
-					android:layout_height="wrap_content">
+					android:layout_height="wrap_content"
+					android:layout_marginTop="10.0dip"
+					android:layout_below="@+id/message">
 
-					<ImageView
-						android:layout_width="30.0dip"
-						android:layout_height="30.0dip"
-						android:layout_marginLeft="13.0dip"
-						android:layout_marginTop="10.0dip"
-						android:layout_marginBottom="10.0dip"
-						android:src="@drawable/ic_clock"/>
+					<EditText
+						android:id="@+id/serverName_edit"
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+						android:hint="Server Name"
+                        
+                        android:textColor="@color/colorOpposite"
+						android:singleLine="true"
+                        android:textSize="12.0dip"
+						android:layout_marginLeft="10dp"
+						android:layout_marginRight="10dp"
+						android:layout_marginTop="10dp"/>
+
+					<EditText
+						android:id="@+id/serverInfo_edit"
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+						android:hint="Server Info"
+                        android:textColor="@color/colorOpposite"
+                        android:textSize="12.0dip"
+						android:singleLine="true"
+						android:layout_marginLeft="10dp"
+						android:layout_marginRight="10dp"
+						android:visibility="gone"/>
+
+					<EditText
+						android:id="@+id/serverIP_edit"
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+						android:hint="Server IP"
+						android:singleLine="true"
+                        android:textColor="@color/colorOpposite"
+                        android:textSize="12.0dip"
+						android:layout_marginLeft="10dp"
+						android:layout_marginRight="10dp"/>
+
+					<LinearLayout
+						android:orientation="horizontal"
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+                        
+						android:layout_marginLeft="10dp"
+						android:layout_marginRight="10dp">
+
+						<LinearLayout
+							android:orientation="vertical"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content">
+
+							<TextView
+								android:textAppearance="?android:textAppearanceSmall"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+                                android:textSize="12.0dip"
+                                android:textColor="@color/colorOpposite"
+								android:layout_marginLeft="5.0dip"
+								android:text="SSH Port (22)"/>
+
+							<EditText
+								android:id="@+id/serverPort_edit"
+								android:layout_width="100.0dip"
+                                android:textColor="@color/colorOpposite"
+                                android:textSize="12.0dip"
+								android:layout_height="wrap_content"
+								android:singleLine="true"/>
+
+						</LinearLayout>
+
+						<LinearLayout
+							android:orientation="vertical"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+                            android:textSize="12.0dip"
+							android:layout_marginLeft="10.0dip">
+
+							<TextView
+								android:textAppearance="?android:textAppearanceSmall"
+								android:layout_width="wrap_content"
+                                android:textSize="12.0dip"
+                                android:textColor="@color/colorOpposite"
+								android:layout_height="wrap_content"
+								android:text="SSL Port (443)"/>
+
+							<EditText
+								android:id="@+id/serverSSLPort_edit"
+								android:layout_width="100.0dip"
+                                android:textSize="12.0dip"
+                                android:textColor="@color/colorOpposite"
+								android:layout_height="wrap_content"
+								android:singleLine="true"/>
+
+						</LinearLayout>
+
+					</LinearLayout>
+
+					<EditText
+						android:id="@+id/proxyIP_edit"
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+						android:hint="Remote Proxy"
+                        android:textSize="12.0dip"
+						android:singleLine="true"
+                        android:textColor="@color/colorOpposite"
+						android:layout_marginLeft="10dp"
+						android:layout_marginRight="10dp"/>
+
+					<EditText
+						android:id="@+id/proxyPort_edit"
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+						android:hint="Proxy Port"
+						android:singleLine="true"
+                        android:textColor="@color/colorOpposite"
+                        android:textSize="12.0dip"
+						android:layout_marginLeft="10dp"
+						android:layout_marginRight="10dp"/>
 
 					<LinearLayout
 						android:orientation="vertical"
 						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:layout_margin="5.0dip"
-						android:layout_weight="1.0">
+						android:layout_height="wrap_content">
 
-						<TextView
-							android:textAppearance="?android:textAppearanceMedium"
-							android:id="@+id/tvTimeRemaining"
-							android:layout_width="wrap_content"
-							android:textColor="@color/colorOpposite"
+						<LinearLayout
+							android:gravity="center|right"
+							android:orientation="horizontal"
+							android:layout_width="fill_parent"
 							android:layout_height="wrap_content"
-							android:text="00:00"/>
+							android:layout_marginLeft="10dp"
+							android:layout_marginRight="10dp">
+
+							<TextView
+								android:textAppearance="?android:textAppearanceSmall"
+								android:textSize="12.0sp"
+								android:textColor="@color/colorOpposite"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="Auto Login"/>
+
+							<CheckBox
+								android:id="@+id/autoLoginSwitch"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"/>
+
+						</LinearLayout>
+
+						<LinearLayout
+							android:orientation="horizontal"
+							android:id="@+id/layoutAutoLogin"
+							android:layout_width="fill_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="10dp"
+							android:layout_marginRight="10dp">
+
+							<LinearLayout
+								android:orientation="vertical"
+								android:layout_width="130.0dip"
+								android:layout_height="wrap_content">
+
+								<TextView
+									android:textAppearance="?android:textAppearanceSmall"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+                                    android:textSize="12.0dip"
+                                    android:textColor="@color/colorOpposite"
+									android:layout_marginLeft="5.0dip"
+									android:text="Username"/>
+
+								<EditText
+									android:id="@+id/serverUsername"
+									android:layout_width="fill_parent"
+                                    android:textSize="12.0dip"
+                                    android:textColor="@color/colorOpposite"
+									android:layout_height="40.0dip"
+									android:singleLine="true"/>
+
+							</LinearLayout>
+
+							<LinearLayout
+								android:orientation="vertical"
+								android:layout_width="130.0dip"
+								android:layout_height="wrap_content"
+								android:layout_marginLeft="10.0dip">
+
+								<TextView
+									android:textAppearance="?android:textAppearanceSmall"
+									android:layout_width="wrap_content"
+									android:layout_height="wrap_content"
+									android:layout_marginLeft="5.0dip"
+                                    android:textColor="@color/colorOpposite"
+                                    android:textSize="12.0dip"
+									android:text="Password"/>
+
+								<EditText
+									android:id="@+id/serverPassword"
+									android:layout_width="fill_parent"
+									android:layout_height="40.0dip"
+                                    android:textSize="12.0dip"
+                                    android:textColor="@color/colorOpposite"
+									android:inputType="text"/>
+                                
+
+							</LinearLayout>
+
+						</LinearLayout>
+                        
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30.0dip"
+                            android:weightSum="100.0"
+                            android:layout_below="@+id/main">
+
+                            <android.support.v7.widget.CardView
+                                android:gravity="center"
+                                android:id="@+id/negativeBtn"
+                                android:clickable="true"
+                                android:layout_width="fill_parent"
+                                android:layout_height="70.0dip"
+                                android:foreground="?selectableItemBackground"
+                                android:layout_weight="50.0"
+                                android:layout_centerHorizontal="true"
+                                android:shape="ring"
+                                android:thicknessRatio="1.9"
+                                android:innerRadius="0.0dip"
+                                android:elevation="5.0dip"
+                                app:cardBackgroundColor="@color/colorPrimary"
+                                app:cardCornerRadius="25.0dip"
+                                app:cardUseCompatPadding="true">
+
+                                <TextView
+                                    android:textSize="15.0dip"
+                                    android:textColor="@color/colorOpposite"
+                                    android:layout_gravity="center"
+                                    android:id="@+id/cancel1"
+                                    android:gravity="center"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Cancel"/>
+
+                            </android.support.v7.widget.CardView>
+
+                            <android.support.v7.widget.CardView
+                                android:gravity="center"
+                                android:id="@+id/saves"
+                                android:clickable="true"
+                                android:layout_width="fill_parent"
+                                android:layout_height="70.0dip"
+                                android:foreground="?selectableItemBackground"
+                                android:layout_weight="50.0"
+                                android:layout_centerHorizontal="true"
+                                android:shape="ring"
+                                android:thicknessRatio="1.9"
+                                android:innerRadius="0.0dip"
+                                android:elevation="5.0dip"
+                                app:cardBackgroundColor="@color/colorPrimary"
+                                app:cardCornerRadius="25.0dip"
+                                app:cardUseCompatPadding="true">
+
+                                <TextView
+                                    android:textSize="15.0dip"
+                                    android:textColor="@color/colorOpposite"
+                                    android:layout_gravity="center"
+                                    android:id="@+id/save1"
+                                    android:gravity="center"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Save"/>
+
+                            </android.support.v7.widget.CardView>
+
+                        </LinearLayout>
 
 					</LinearLayout>
 
-					<Button
-						android:textSize="13.0sp"
-						android:typeface="normal"
-						android:textColor="@color/colorOpposite"
-						android:gravity="center"
-						android:id="@+id/btnAddTime"
-						android:background="@drawable/btn_blue"
-						android:layout_width="135.0dip"
-						android:layout_height="35.0dip"
-						android:layout_marginRight="7.0dip"
-						android:text="ADD + TIME"
-						android:textAlignment="center"/>
-
 				</LinearLayout>
 
-			</LinearLayout>
-
-		</LinearLayout>
-
-		<RelativeLayout
-			android:layout_height="wrap_content"
-			android:layout_width="match_parent"
-			android:gravity="right|center"
-			android:visibility="gone">
-
-			<LinearLayout
-				android:layout_height="wrap_content"
-				android:layout_width="wrap_content"
-				android:orientation="horizontal"
-				android:gravity="right|center|center_vertical"
-				android:id="@+id/customs">
-
-				<TextView
-					android:layout_height="wrap_content"
-					android:textAppearance="?android:attr/textAppearanceSmall"
-					android:layout_width="wrap_content"
-					android:text="Google DNS"
-					android:textColor="#ffffff"
-					android:textSize="13sp"
-					android:gravity="center"
-					android:id="@+id/customP"/>
-
-				<ImageView
-					android:id="@+id/custom_p"
-					android:layout_width="15.0dip"
-					android:layout_height="15.0dip"
-					android:src="@drawable/ark"
-					android:tint="#000000"
-					android:visibility="gone"
-					android:adjustViewBounds="true"/>
-
-				<CheckBox
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginRight="10dp"
-					android:id="@+id/useDns"/>
-
-			</LinearLayout>
+			</RelativeLayout>
 
 		</RelativeLayout>
 
-	</RelativeLayout>
+	</android.support.v7.widget.CardView>
 
-	<include
-		layout="@layout/h_to"/>
-
-</LinearLayout>
+</RelativeLayout> 
