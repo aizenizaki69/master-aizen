@@ -33,9 +33,9 @@
 					android:layout_width="fill_parent"
 					android:layout_height="100.0dip"/>
 
-				<ImageView 
+				<ImageView
 					android:id="@id/icon"
-					android:background="@drawable/s_edit"
+					android:background="@drawable/c_edit"
                     android:backgroundTint="@color/colorOpposite"
 					android:layout_width="50.0dip"
 					android:layout_height="50.0dip"
@@ -62,7 +62,7 @@
 					android:paddingRight="16.0dip"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:text="Custom Server"
+					android:text="Custom Tweak"
 					android:textAlignment="center"/>
 
 				<TextView
@@ -75,7 +75,7 @@
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:layout_marginTop="14.0dip"
-					android:text="Enter your private server details"
+					android:text="Enter your own tweak details"
 					android:layout_below="@id/title"
 					android:textAlignment="center"/>
 
@@ -87,278 +87,131 @@
 					android:layout_marginTop="10.0dip"
 					android:layout_below="@+id/message">
 
-					<EditText
-						android:id="@+id/serverName_edit"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:hint="Server Name"
-                        
-                        android:textColor="@color/colorOpposite"
-						android:singleLine="true"
-                        android:textSize="12.0dip"
-						android:layout_marginLeft="10dp"
-						android:layout_marginRight="10dp"
-						android:layout_marginTop="10dp"/>
-
-					<EditText
-						android:id="@+id/serverInfo_edit"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:hint="Server Info"
-                        android:textColor="@color/colorOpposite"
-                        android:textSize="12.0dip"
-						android:singleLine="true"
-						android:layout_marginLeft="10dp"
-						android:layout_marginRight="10dp"
-						android:visibility="gone"/>
-
-					<EditText
-						android:id="@+id/serverIP_edit"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:hint="Server IP"
-						android:singleLine="true"
-                        android:textColor="@color/colorOpposite"
-                        android:textSize="12.0dip"
-						android:layout_marginLeft="10dp"
-						android:layout_marginRight="10dp"/>
-
 					<LinearLayout
-						android:orientation="horizontal"
 						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-                        
-						android:layout_marginLeft="10dp"
-						android:layout_marginRight="10dp">
+						android:layout_height="match_parent"
+						android:paddingLeft="?dialogPreferredPadding"
+						android:paddingRight="?dialogPreferredPadding"
+						android:orientation="vertical">
 
 						<LinearLayout
 							android:orientation="vertical"
-							android:layout_width="wrap_content"
+							android:layout_width="match_parent"
 							android:layout_height="wrap_content">
 
 							<TextView
-								android:textAppearance="?android:textAppearanceSmall"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
+								android:text="Payload Name:"
                                 android:textSize="12.0dip"
-                                android:textColor="@color/colorOpposite"
-								android:layout_marginLeft="5.0dip"
-								android:text="SSH Port (22)"/>
+                                
+								android:textAppearance="?android:attr/textAppearanceSmall"
+								android:layout_marginTop="10dp"
+							
+								android:textColor="@color/colorOpposite"/>
 
 							<EditText
-								android:id="@+id/serverPort_edit"
-								android:layout_width="100.0dip"
-                                android:textColor="@color/colorOpposite"
-                                android:textSize="12.0dip"
+								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
-								android:singleLine="true"/>
+                                android:textSize="12.0dip"
+                                android:textColor="@color/colorOpposite"
+								android:maxLines="10"
+								android:id="@+id/add_payloadNameEditText"/>
 
 						</LinearLayout>
 
 						<LinearLayout
 							android:orientation="vertical"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-                            android:textSize="12.0dip"
-							android:layout_marginLeft="10.0dip">
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content">
 
 							<TextView
-								android:textAppearance="?android:textAppearanceSmall"
 								android:layout_width="wrap_content"
-                                android:textSize="12.0dip"
-                                android:textColor="@color/colorOpposite"
 								android:layout_height="wrap_content"
-								android:text="SSL Port (443)"/>
+								android:text="Payload Text:"
+                                android:textSize="12.0dip"
+								android:textAppearance="?android:attr/textAppearanceSmall"
+								android:layout_marginTop="10dp"
+				
+								android:textColor="@color/colorOpposite"/>
 
 							<EditText
-								android:id="@+id/serverSSLPort_edit"
-								android:layout_width="100.0dip"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
                                 android:textSize="12.0dip"
                                 android:textColor="@color/colorOpposite"
-								android:layout_height="wrap_content"
-								android:singleLine="true"/>
-
-						</LinearLayout>
-
-					</LinearLayout>
-
-					<EditText
-						android:id="@+id/proxyIP_edit"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:hint="Remote Proxy"
-                        android:textSize="12.0dip"
-						android:singleLine="true"
-                        android:textColor="@color/colorOpposite"
-						android:layout_marginLeft="10dp"
-						android:layout_marginRight="10dp"/>
-
-					<EditText
-						android:id="@+id/proxyPort_edit"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:hint="Proxy Port"
-						android:singleLine="true"
-                        android:textColor="@color/colorOpposite"
-                        android:textSize="12.0dip"
-						android:layout_marginLeft="10dp"
-						android:layout_marginRight="10dp"/>
-
-					<LinearLayout
-						android:orientation="vertical"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content">
-
-						<LinearLayout
-							android:gravity="center|right"
-							android:orientation="horizontal"
-							android:layout_width="fill_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginLeft="10dp"
-							android:layout_marginRight="10dp">
-
-							<TextView
-								android:textAppearance="?android:textAppearanceSmall"
-								android:textSize="12.0sp"
-								android:textColor="@color/colorOpposite"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:text="Auto Login"/>
-
-							<CheckBox
-								android:id="@+id/autoLoginSwitch"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"/>
-
-						</LinearLayout>
-
-						<LinearLayout
-							android:orientation="horizontal"
-							android:id="@+id/layoutAutoLogin"
-							android:layout_width="fill_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginLeft="10dp"
-							android:layout_marginRight="10dp">
+								android:maxLines="5"
+								android:id="@+id/add_myHTTPEditText"/>
 
 							<LinearLayout
-								android:orientation="vertical"
-								android:layout_width="130.0dip"
-								android:layout_height="wrap_content">
-
-								<TextView
-									android:textAppearance="?android:textAppearanceSmall"
-									android:layout_width="wrap_content"
-									android:layout_height="wrap_content"
-                                    android:textSize="12.0dip"
-                                    android:textColor="@color/colorOpposite"
-									android:layout_marginLeft="5.0dip"
-									android:text="Username"/>
-
-								<EditText
-									android:id="@+id/serverUsername"
-									android:layout_width="fill_parent"
-                                    android:textSize="12.0dip"
-                                    android:textColor="@color/colorOpposite"
-									android:layout_height="40.0dip"
-									android:singleLine="true"/>
-
-							</LinearLayout>
-
-							<LinearLayout
-								android:orientation="vertical"
-								android:layout_width="130.0dip"
+								android:orientation="horizontal"
+								android:layout_width="fill_parent"
 								android:layout_height="wrap_content"
-								android:layout_marginLeft="10.0dip">
+								android:layout_marginTop="30.0dip"
+								android:weightSum="100.0"
+								android:layout_below="@+id/main">
 
-								<TextView
-									android:textAppearance="?android:textAppearanceSmall"
-									android:layout_width="wrap_content"
-									android:layout_height="wrap_content"
-									android:layout_marginLeft="5.0dip"
-                                    android:textColor="@color/colorOpposite"
-                                    android:textSize="12.0dip"
-									android:text="Password"/>
-
-								<EditText
-									android:id="@+id/serverPassword"
+								<android.support.v7.widget.CardView
+									android:gravity="center"
+									android:id="@+id/negativeBtn"
+									android:clickable="true"
 									android:layout_width="fill_parent"
-									android:layout_height="40.0dip"
-                                    android:textSize="12.0dip"
-                                    android:textColor="@color/colorOpposite"
-									android:inputType="text"/>
-                                
+									android:layout_height="70.0dip"
+									android:foreground="?selectableItemBackground"
+									android:layout_weight="50.0"
+									android:layout_centerHorizontal="true"
+									android:shape="ring"
+									android:thicknessRatio="1.9"
+									android:innerRadius="0.0dip"
+									android:elevation="5.0dip"
+									app:cardBackgroundColor="@color/colorPrimary"
+									app:cardCornerRadius="25.0dip"
+									app:cardUseCompatPadding="true">
+
+									<TextView
+										android:textSize="15.0dip"
+										android:textColor="@color/colorOpposite"
+										android:layout_gravity="center"
+										android:id="@+id/gen"
+										android:gravity="center"
+                                        android:layout_width="fill_parent"
+										android:layout_height="wrap_content"
+										android:text="Generate"/>
+
+								</android.support.v7.widget.CardView>
+
+								<android.support.v7.widget.CardView
+									android:gravity="center"
+									android:id="@+id/saves"
+									android:clickable="true"
+									android:layout_width="fill_parent"
+									android:layout_height="70.0dip"
+									android:foreground="?selectableItemBackground"
+									android:layout_weight="50.0"
+									android:layout_centerHorizontal="true"
+									android:shape="ring"
+									android:thicknessRatio="1.9"
+									android:innerRadius="0.0dip"
+									android:elevation="5.0dip"
+									app:cardBackgroundColor="@color/colorPrimary"
+									app:cardCornerRadius="25.0dip"
+									app:cardUseCompatPadding="true">
+
+									<TextView
+										android:textSize="15.0dip"
+										android:textColor="@color/colorOpposite"
+										android:layout_gravity="center"
+										android:id="@+id/save"
+										android:gravity="center"
+                                        android:layout_width="fill_parent"
+										android:layout_height="wrap_content"
+										android:text="Save"/>
+
+								</android.support.v7.widget.CardView>
 
 							</LinearLayout>
 
 						</LinearLayout>
-                        
-                        <LinearLayout
-                            android:orientation="horizontal"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="30.0dip"
-                            android:weightSum="100.0"
-                            android:layout_below="@+id/main">
-
-                            <android.support.v7.widget.CardView
-                                android:gravity="center"
-                                android:id="@+id/negativeBtn"
-                                android:clickable="true"
-                                android:layout_width="fill_parent"
-                                android:layout_height="70.0dip"
-                                android:foreground="?selectableItemBackground"
-                                android:layout_weight="50.0"
-                                android:layout_centerHorizontal="true"
-                                android:shape="ring"
-                                android:thicknessRatio="1.9"
-                                android:innerRadius="0.0dip"
-                                android:elevation="5.0dip"
-                                app:cardBackgroundColor="@color/colorPrimary"
-                                app:cardCornerRadius="25.0dip"
-                                app:cardUseCompatPadding="true">
-
-                                <TextView
-                                    android:textSize="15.0dip"
-                                    android:textColor="@color/colorOpposite"
-                                    android:layout_gravity="center"
-                                    android:id="@+id/cancel1"
-                                    android:gravity="center"
-                                    android:layout_width="fill_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="Cancel"/>
-
-                            </android.support.v7.widget.CardView>
-
-                            <android.support.v7.widget.CardView
-                                android:gravity="center"
-                                android:id="@+id/saves"
-                                android:clickable="true"
-                                android:layout_width="fill_parent"
-                                android:layout_height="70.0dip"
-                                android:foreground="?selectableItemBackground"
-                                android:layout_weight="50.0"
-                                android:layout_centerHorizontal="true"
-                                android:shape="ring"
-                                android:thicknessRatio="1.9"
-                                android:innerRadius="0.0dip"
-                                android:elevation="5.0dip"
-                                app:cardBackgroundColor="@color/colorPrimary"
-                                app:cardCornerRadius="25.0dip"
-                                app:cardUseCompatPadding="true">
-
-                                <TextView
-                                    android:textSize="15.0dip"
-                                    android:textColor="@color/colorOpposite"
-                                    android:layout_gravity="center"
-                                    android:id="@+id/save1"
-                                    android:gravity="center"
-                                    android:layout_width="fill_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="Save"/>
-
-                            </android.support.v7.widget.CardView>
-
-                        </LinearLayout>
 
 					</LinearLayout>
 
@@ -368,6 +221,6 @@
 
 		</RelativeLayout>
 
-	</android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>
 
-</RelativeLayout> 
+</RelativeLayout>
