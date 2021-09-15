@@ -1,163 +1,229 @@
-package https.socks.android.util;
+package com.slipkprojects.ultrasshservice.tunnel;
 
-import android.util.Base64;
-import android.util.Log;
-import android.widget.Toast;
-import https.socks.android.util.Ror;
+
+import com.slipkprojects.ultrasshservice.logger.SkStatus;
+import com.slipkprojects.ultrasshservice.tunnel.TLSSocketFactory;
+import com.slipkprojects.ultrasshservice.tunnel.TunnelUtils;
+import com.trilead.ssh2.ProxyData;
+import com.trilead.ssh2.crypto.Base64;
+import com.trilead.ssh2.transport.ClientServerHello;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import https.socks.android.SocksHttpMainActivity; 
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.channels.SocketChannel;
+import java.util.Arrays;
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.SSLSocket;
 
-public final class Ror { 
-    private static final String AES_MODE = "AES/CBC/PKCS7Padding"; 
-    private static final String CHARSET = "UTF-8"; 
-    public static boolean DEBUG_LOG_ENABLED = false; 
-    private static final String HASH_ALGORITHM = "SHA-256"; 
-    private static final String TAG = "Ror"; 
-    private static final byte[] ivBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    private static final String vars = "4paZ4paa4pab4pac4pad4pae4paf4paD4paE4paF4paG4paH4paI4paJ4paK4paQ"; 
+public class SSLProxy implements ProxyData
+{
+    @Override
+    public void close() {
+        if (mSocket == null){
+            return;
+        }
+        try {
+            mSocket.close();
+        } catch (IOException e) { /* failed */ }
+    }
 
-    private static SecretKeySpec generateKey(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException { 
-        MessageDigest instance = MessageDigest.getInstance(HASH_ALGORITHM); 
-        byte[] bytes = str.getBytes(CHARSET); 
-        instance.update(bytes, 0, bytes.length); 
-        byte[] digest = instance.digest(); 
-        log("SHA-256 key ", digest); 
-        return new SecretKeySpec(digest, "AES"); 
-    } 
+    class HandshakeTunnelCompletedListener implements HandshakeCompletedListener {
+        private final String val$host;
+        private final int val$port;
+        private final SSLSocket val$sslSocket;
 
-    public static String encrypt(String str, String str2, String str3) throws GeneralSecurityException { 
-        String genUser = genUser(str); 
-        try { 
-            SecretKeySpec generateKey = generateKey(new StringBuffer().append(genUser).append(genKey(str2)).toString()); 
-            log("message", str3); 
-            genUser = Base64.encodeToString(encrypt(generateKey, ivBytes, str3.getBytes(CHARSET)), 2); 
-            log("Base64.NO_WRAP", genUser); 
-            return genCode(genUser); 
-        } catch (UnsupportedEncodingException e) { 
-            if (DEBUG_LOG_ENABLED) { 
-                Log.e(TAG, "UnsupportedEncodingException ", e); 
-            } 
-            throw new GeneralSecurityException(e); 
-        } 
-    } 
+        HandshakeTunnelCompletedListener( String str, int i, SSLSocket sSLSocket) {
+            this.val$host = str;
+            this.val$port = i;
+            this.val$sslSocket = sSLSocket;
 
-    public static byte[] encrypt(SecretKeySpec secretKeySpec, byte[] bArr, byte[] bArr2) throws GeneralSecurityException { 
-        Cipher instance = Cipher.getInstance(AES_MODE); 
-        instance.init(1, secretKeySpec, new IvParameterSpec(bArr)); 
-        byte[] doFinal = instance.doFinal(bArr2); 
-        log("cipherText", doFinal); 
-        return doFinal; 
-    } 
 
-    public static String decrypt(String str, String str2, String str3) throws GeneralSecurityException { 
-        String genString = genString(str3); 
-        String genUser = genUser(str); 
-        try { 
-            SecretKeySpec generateKey = generateKey(new StringBuffer().append(genUser).append(genKey(str2)).toString()); 
-            log("base64EncodedCipherText", genString); 
-            byte[] decode = Base64.decode(genString, 2); 
-            log("decodedCipherText", decode); 
-            decode = decrypt(generateKey, ivBytes, decode); 
-            log("decryptedBytes", decode); 
-            genUser = new String(decode, CHARSET); 
-            log("message", genUser); 
-            return genUser; 
-        } catch (UnsupportedEncodingException e) { 
-            if (DEBUG_LOG_ENABLED) { 
-                Log.e(TAG, "UnsupportedEncodingException ", e); 
-            } 
-            throw new GeneralSecurityException(e); 
-        } 
-    } 
+        }
 
-    public static byte[] decrypt(SecretKeySpec secretKeySpec, byte[] bArr, byte[] bArr2) throws GeneralSecurityException { 
-        Cipher instance = Cipher.getInstance(AES_MODE); 
-        instance.init(2, secretKeySpec, new IvParameterSpec(bArr)); 
-        byte[] doFinal = instance.doFinal(bArr2); 
-        log("decryptedBytes", doFinal); 
-        return doFinal; 
-    } 
 
-    private static void log(String str, byte[] bArr) { 
-        if (DEBUG_LOG_ENABLED) { 
-            Log.d(TAG, new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(str).append("[").toString()).append(bArr.length).toString()).append("] [").toString()).append(bytesToHex(bArr)).toString()).append("]").toString()); 
-        } 
-    } 
+        public void handshakeCompleted(HandshakeCompletedEvent handshakeCompletedEvent) {                                               
+           // SkStatus.logInfo(new StringBuffer().append("SSL: Supported protocols: <br>").append(Arrays.toString(val$sslSocket.getSupportedProtocols())).toString().replace("[", "").replace("]", "").replace(",", "<br>"));
+            //SkStatus.logInfo(new StringBuffer().append("SSL: Enabled protocols: <br>").append(Arrays.toString(val$sslSocket.getEnabledProtocols())).toString().replace("[", "").replace("]", "").replace(",", "<br>"));
+             SkStatus.logInfo("SSL: Using cipher " + handshakeCompletedEvent.getSession().getCipherSuite());
+            SkStatus.logInfo("SSL: Using protocol " + handshakeCompletedEvent.getSession().getProtocol());
+            SkStatus.logInfo("SSL: Handshake finished");
+        }
+    }
 
-    private static void log(String str, String str2) { 
-        if (DEBUG_LOG_ENABLED) { 
-            Log.d(TAG, new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(new StringBuffer().append(str).append("[").toString()).append(str2.length()).toString()).append("] [").toString()).append(str2).toString()).append("]").toString()); 
-        } 
-    } 
+    private  String proxyPass;    
+    private  String proxyUser;
+    private String requestPayload;
 
-    private static String bytesToHex(byte[] bArr) { 
-        char[] cArr = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}; 
-        char[] cArr2 = new char[(bArr.length * 2)]; 
-        for (int i = 0; i < bArr.length; i++) { 
-            int i2 = bArr[i] & 255; 
-            cArr2[i * 2] = cArr[i2 >>> 4]; 
-            cArr2[(i * 2) + 1] = cArr[i2 & 15]; 
-        } 
-        return new String(cArr2); 
-    } 
+    private String stunnelServer;
+    private int stunnelPort = 443;
+    private String stunnelHostSNI;;
+    private Socket mSocket;
 
-    Ror() {} 
+    public SSLProxy(String server, int port, String hostSni, String requestPayload) {
+        this.stunnelServer = server;
+        this.stunnelPort = port;
+        this.stunnelHostSNI = hostSni;
+        this.proxyUser = null;
+        this.proxyPass = null;
+        this.requestPayload = requestPayload;
+    }
 
-    public static String genUser(String str) { 
-        return Base64.encodeToString(str.getBytes(), 0); 
-    } 
+    @Override
+    public Socket openConnection(String hostname, int port, int connectTimeout, int readTimeout) throws IOException
+    {
+        mSocket = SocketChannel.open().socket();
+        mSocket.connect(new InetSocketAddress(stunnelServer, stunnelPort));
 
-    public static String genKey(String str) { 
-        if (str != null) { 
-            return asHex(str.getBytes()); 
-        } 
-        throw new NullPointerException(); 
-    } 
+        if (mSocket.isConnected())
+        {
+            mSocket = doSSLHandshake(hostname, stunnelHostSNI, port);
+            //SkStatus.logInfo(R.string.state_proxy_running);
 
-    private static String asHex(byte[] bArr) { 
-        char[] toCharArray = "0123456789ABCDEF".toCharArray(); 
-        StringBuilder stringBuilder = new StringBuilder(); 
-        for (byte b : bArr) { 
-            stringBuilder.append(toCharArray[(b & 240) >> 4]); 
-            stringBuilder.append(toCharArray[b & 15]); 
-        } 
-        return stringBuilder.toString(); 
-    } 
+            String requestPayload = getRequestPayload(hostname, port);
 
-    public static String genCode(String str) { 
-        if (str != null) { 
-            return gen(str.getBytes()); 
-        } 
-        throw new NullPointerException(); 
-    } 
+            OutputStream out = mSocket.getOutputStream();
+            // suporte a [split] na payload
+            if (!TunnelUtils.injectSplitPayload(requestPayload, out)) {
+                try {
+                    out.write(requestPayload.getBytes("ISO-8859-1"));
+                } catch (UnsupportedEncodingException e2) {
+                    out.write(requestPayload.getBytes());
+                }
+                out.flush();
+            }
 
-    private static String gen(byte[] bArr) { 
-        char[] toCharArray = var(vars).toCharArray(); 
-        StringBuilder stringBuilder = new StringBuilder(); 
-        for (byte b : bArr) { 
-            stringBuilder.append(toCharArray[(b & 240) >> 4]); 
-            stringBuilder.append(toCharArray[b & 15]); 
-        } 
-        return stringBuilder.toString(); 
-    } 
+            byte[] buffer = new byte[1024];
+            InputStream in = mSocket.getInputStream();
 
-    public static String var(String str) { 
-        return new String(Base64.decode(str, 0)); 
-    } 
+            // lÃª primeira linha
+            int len = ClientServerHello.readLineRN(in, buffer);
 
-    public static String genString(String str) { 
-        String var = var(vars); 
-        char[] toCharArray = str.toCharArray(); 
-        byte[] bArr = new byte[(str.length() / 2)]; 
-        for (int i = 0; i < bArr.length; i++) { 
-            bArr[i] = (byte) (((var.indexOf(toCharArray[i * 2]) * 16) + var.indexOf(toCharArray[(i * 2) + 1])) & 255); 
-        } 
-        return new String(bArr); 
-    } 
-  }
+            String httpReponseFirstLine = "";
+            try {
+                httpReponseFirstLine = new String(buffer, 0, len, "ISO-8859-1");
+            } catch (UnsupportedEncodingException e3) {
+                httpReponseFirstLine = new String(buffer, 0, len);
+            }
+
+            //SkStatus.logInfo("<strong>" + httpReponseFirstLine + "</strong>");
+
+           /* StringBuilder sb = new StringBuilder();
+            sb.append("<b>");
+            sb.append(httpReponseFirstLine);
+            sb.append("</b>");
+            SkStatus.logInfo(sb.toString());*/
+
+           // len = Integer.parseInt(httpReponseFirstLine.substring(9, 12));      
+
+          /*  if (len != 200) {
+                String asw = String.valueOf(len);
+                //String replacw = httpReponseFirstLine.replace(httpReponseFirstLine, "HTTP/1.1 200 Ok");
+                
+                StringBuilder su = new StringBuilder();
+                su.append("<b>");
+               // su.append("Sending "+replacw);
+                su.append("</b>");
+                SkStatus.logInfo(su.toString());
+                len = Integer.parseInt(asw.replace(asw, "200"));
+            } else {
+                return mSocket;
+            }*/
+
+            String httpReponseAll = httpReponseFirstLine;
+
+            while ((len = ClientServerHello.readLineRN(in, buffer)) != 0) {
+                httpReponseAll += "\n";
+                try {
+                    httpReponseAll += new String(buffer, 0, len, "ISO-8859-1");
+                } catch (UnsupportedEncodingException e3) {
+                    httpReponseAll += new String(buffer, 0, len);
+                }
+            }
+
+            if (!httpReponseAll.isEmpty())
+                SkStatus.logDebug(httpReponseAll);
+            if (httpReponseFirstLine.startsWith("HTTP/") == false) throw new IOException("The proxy did not send back a valid HTTP response.");
+            if (httpReponseFirstLine.length() < 14) throw new IOException("The proxy did not send back a valid HTTP response.");
+            if (httpReponseFirstLine.charAt(8) != ' ') throw new IOException("The proxy did not send back a valid HTTP response.");
+            if (httpReponseFirstLine.charAt(12) != ' ') throw new IOException("The proxy did not send back a valid HTTP response.");
+
+            if (len < 0 || len > 999) {
+
+                throw new IOException("The proxy did not send back a valid HTTP response.");
+
+            } else if (len != 200) {
+                SkStatus.logInfo("<b>Extra Info</b> Please make sure your payload is correct");
+                SkStatus.logInfo("Sending 200 HTTP status - HTTP/1.1 200 OK");
+              //  String stringBuffer = new StringBuffer().append(new StringBuffer().append("HTTP/1.0 200 Connection established").append("\r\n").toString()).append("\r\n").toString();            
+               // out.write(stringBuffer.getBytes());                      
+                out.flush();                       
+                //SkStatus.logInfo("<b>"+stringBuffer.toString()+"</b>");             
+                return mSocket;
+            } else {
+                return mSocket;
+            }
+        }
+        return mSocket;
+    }
+
+    private String getRequestPayload(String hostname, int port) {
+        String payload = this.requestPayload;
+
+        if (payload != null) {
+            payload = TunnelUtils.formatCustomPayload(hostname, port, payload);
+        }
+        else {
+            StringBuffer sb = new StringBuffer();
+
+            sb.append("CONNECT ");
+            sb.append(hostname);
+            sb.append(':');
+            sb.append(port);
+            sb.append(" HTTP/1.0\r\n");
+            if (!(this.proxyUser == null || this.proxyPass == null)) {
+                char[] encoded;
+                String credentials = this.proxyUser + ":" + this.proxyPass;
+                try {
+                    encoded = Base64.encode(credentials.getBytes("ISO-8859-1"));
+                } catch (UnsupportedEncodingException e) {
+                    encoded = Base64.encode(credentials.getBytes());
+                }
+                sb.append("Proxy-Authorization: Basic ");
+                sb.append(encoded);
+                sb.append("\r\n");
+            }
+            sb.append("\r\n");
+
+            payload = sb.toString();
+        }
+
+        return payload;
+    }
+
+    private SSLSocket doSSLHandshake(String host, String sni, int port) throws IOException {
+        try {
+            TLSSocketFactory tsf = new TLSSocketFactory();
+            SSLSocket socket = (SSLSocket) tsf.createSocket(host, port);
+            try {
+                socket.getClass().getMethod("setHostname", String.class).invoke(socket, sni);
+                SkStatus.logInfo("Setting up SNI...");
+            } catch (Throwable e) {
+                // ignore any error, we just can't set the hostname...
+            }
+
+            //socket.setEnabledProtocols(socket.getSupportedProtocols());
+
+            socket.addHandshakeCompletedListener(new HandshakeTunnelCompletedListener(host, port, socket));
+            SkStatus.logInfo("Starting SSL Handshake...");
+            socket.startHandshake();
+            return socket;
+        } catch (Exception e) {
+            IOException iOException = new IOException(new StringBuffer().append("Could not do SSL handshake: ").append(e).toString());
+            throw iOException;
+        }
+    }
+}
