@@ -1,272 +1,351 @@
-import android.content.Context;
+package https.socks.android;
 
-import com.slipkprojects.ultrasshservice.logger.*;
-import com.trilead.ssh2.HTTPProxyException;
-import com.trilead.ssh2.ProxyData;
-import com.trilead.ssh2.crypto.Base64;
-import com.trilead.ssh2.sftp.Packet;
-import com.trilead.ssh2.transport.ClientServerHello;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.channels.SocketChannel;
-import java.security.SecureRandom;
-import java.util.Arrays;
+import java.io.ByteArrayOutputStream;
 
-import javax.net.ssl.HandshakeCompletedEvent;
-import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-public class SSLProxy implements ProxyData
-{
-	private Context mContext;
-
-	@Override
-	public void close()
-	{
-		if (mSocket == null) return;
-
-		try {
-			mSocket.close();
-		} catch (IOException e) { /* failed */ }
-	}
+public final class Pc {
 
 
-
-	class HandshakeTunnelCompletedListener implements HandshakeCompletedListener {
-        private final String val$host;
-        private final int val$port;
-        private final SSLSocket val$sslSocket;
-
-        HandshakeTunnelCompletedListener( String str, int i, SSLSocket sSLSocket) {
-            this.val$host = str;
-            this.val$port = i;
-            this.val$sslSocket = sSLSocket;
+    private static final int DELTA = -1703701580;
+    public static final String key = new String(new byte[]{114,104,88,78,104,76,99,50,87,86,51,86,81,74,122,66,74,117,107,108,52,65,61,61});
+    static final class TeaBase64
+    {
 
 
+        private  TeaBase64() {}
+
+
+        public static final String encode(byte[] data) {
+            final char[] base64EncodeChars = new char[] {
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+                'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+                'w', 'x', 'y', 'z', '0', '1', '2', '3',
+                '4', '5', '6', '7', '8', '9', '+', '/' };
+            StringBuilder sb = new StringBuilder();
+            int r = data.length % 3;
+            int len = data.length - r;
+            int i = 0;
+            int c;
+            while (i < len) {
+                c = (0x000000ff & data[i++]) << 16 |
+                    (0x000000ff & data[i++]) << 8  |
+                    (0x000000ff & data[i++]);
+                sb.append(base64EncodeChars[c >> 18]);
+                sb.append(base64EncodeChars[c >> 12 & 0x3f]);
+                sb.append(base64EncodeChars[c >> 6  & 0x3f]);
+                sb.append(base64EncodeChars[c & 0x3f]);
+            }
+            if (r == 1) {
+                c = 0x000000ff & data[i++];
+                sb.append(base64EncodeChars[c >> 2]);
+                sb.append(base64EncodeChars[(c & 0x03) << 4]);
+                sb.append("==");
+            }
+            else if (r == 2) {
+                c = (0x000000ff & data[i++]) << 8 |
+                    (0x000000ff & data[i++]);
+                sb.append(base64EncodeChars[c >> 10]);
+                sb.append(base64EncodeChars[c >> 4 & 0x3f]);
+                sb.append(base64EncodeChars[(c & 0x0f) << 2]);
+                sb.append("=");
+            }
+            return sb.toString();
         }
 
-
-        public void handshakeCompleted(HandshakeCompletedEvent handshakeCompletedEvent) {
-			// addLog(new StringBuffer().append("<b>Established ").append(handshakeCompletedEvent.getSession().getProtocol()).append(" connection with ").append(val$host).append(":").append(this.val$port).append(" using ").append(handshakeCompletedEvent.getCipherSuite()).append("</b>").toString());
-			//addLog(new StringBuffer().append("<b>Established ").append(handshakeCompletedEvent.getSession().getProtocol()).append(" connection ").append("using ").append(handshakeCompletedEvent.getCipherSuite()).append("</b>").toString());
-		    //addLog(new StringBuffer().append("Supported cipher suites: ").append(Arrays.toString(this.val$sslSocket.getSupportedCipherSuites())).toString());
-            //addLog(new StringBuffer().append("Enabled cipher suites: ").append(Arrays.toString(this.val$sslSocket.getEnabledCipherSuites())).toString());
-            SkStatus.logInfo(new StringBuffer().append("SSL: Supported protocols: <br>").append(Arrays.toString(val$sslSocket.getSupportedProtocols())).toString().replace("[", "").replace("]", "").replace(",", "<br>"));
-			SkStatus.logInfo(new StringBuffer().append("SSL: Enabled protocols: <br>").append(Arrays.toString(val$sslSocket.getEnabledProtocols())).toString().replace("[", "").replace("]", "").replace(",", "<br>"));
-			SkStatus.logInfo("SSL: Using cipher " + handshakeCompletedEvent.getSession().getCipherSuite());
-			SkStatus.logInfo("SSL: Using protocol " + handshakeCompletedEvent.getSession().getProtocol());
-			SkStatus.logInfo("SSL: Handshake finished");
+        public static final byte[] decode(String str) {
+            final byte[] base64DecodeChars = new byte[] {
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
+                52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+                -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+                15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
+                -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+                41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1 };
+            byte[] data = str.getBytes();
+            int len = data.length;
+            ByteArrayOutputStream buf = new ByteArrayOutputStream(len);
+            int i = 0;
+            int b1, b2, b3, b4;
+            while (i < len) {
+                do {
+                    b1 = base64DecodeChars[data[i++]];
+                } while (i < len && b1 == -1);
+                if (b1 == -1) {
+                    break;
+                }
+                do {
+                    b2 = base64DecodeChars[data[i++]];
+                } while (i < len && b2 == -1);
+                if (b2 == -1) {
+                    break;
+                }
+                buf.write(((b1 << 2) | ((b2 & 0x30) >>> 4)));
+                do {
+                    b3 = data[i++];
+                    if (b3 == 61) {
+                        return buf.toByteArray();
+                    }
+                    b3 = base64DecodeChars[b3];
+                } while (i < len && b3 == -1);
+                if (b3 == -1) {
+                    break;
+                }
+                buf.write((((b2 & 0x0f) << 4) | ((b3 & 0x3c) >>> 2)));
+                do {
+                    b4 = data[i++];
+                    if (b4 == 61) {
+                        return buf.toByteArray();
+                    }
+                    b4 = base64DecodeChars[b4];
+                } while (i < len && b4 == -1);
+                if (b4 == -1) {
+                    break;
+                }
+                buf.write((((b3 & 0x03) << 6) | b4));
+            }
+            return buf.toByteArray();
         }
     }
 
 
-	private  String proxyHost;
-    private  String proxyPass;
-    private int proxyPort;
-    private  String proxyUser;
-    private String requestPayload;
 
 
 
-
-	private String stunnelServer;
-	private int stunnelPort = 443;
-	private String stunnelHostSNI;;
-	private Socket mSocket;
+    private static int MX(int sum, int y, int z, int p, int e, int[] k) {
+        return (z >>> 5 ^ y << 2) + (y >>> 3 ^ z << 4) ^ (sum ^ y) + (k[p & 3 ^ e] ^ z);
+    }
 
 
-
-	public SSLProxy(String server, int port, String hostSni, String requestPayload) {
-		this.stunnelServer = server;
-		this.stunnelPort = port;
-		this.stunnelHostSNI = hostSni;
-		this.proxyUser = null;
-		this.proxyPass = null;
-		this.requestPayload = requestPayload;
-	}
-
-	@Override
-	public Socket openConnection(String hostname, int port, int connectTimeout, int readTimeout) throws IOException
-	{
-
-		mSocket = SocketChannel.open().socket();
-		mSocket.connect(new InetSocketAddress(stunnelServer, stunnelPort));
-
-		if (mSocket.isConnected())
-		{
-			mSocket = doSSLHandshake(hostname, stunnelHostSNI, port);
-			//SkStatus.logInfo(R.string.state_proxy_running);
-
-			String requestPayload = getRequestPayload(hostname, port);
-
-			OutputStream out = mSocket.getOutputStream();
-			// suporte a [split] na payload
-			if (!TunnelUtils.injectSplitPayload(requestPayload, out)) {
-				try {
-					out.write(requestPayload.getBytes("ISO-8859-1"));
-				} catch (UnsupportedEncodingException e2) {
-					out.write(requestPayload.getBytes());
-				}
-				out.flush();
-			}
-
-			byte[] buffer = new byte[1024];
-			InputStream in = mSocket.getInputStream();
-
-			// lê primeira linha
-			int len = ClientServerHello.readLineRN(in, buffer);
-
-			String httpReponseFirstLine = "";
-			try {
-				httpReponseFirstLine = new String(buffer, 0, len, "ISO-8859-1");
-			} catch (UnsupportedEncodingException e3) {
-				httpReponseFirstLine = new String(buffer, 0, len);
-			}
-
-			SkStatus.logInfo("<strong>" + httpReponseFirstLine + "</strong>");
-
-			String str2 = httpReponseFirstLine;
-			int parseInt = Integer.parseInt(str2.substring(9, 12));
-
-			if (parseInt == 200) {
-				return this.mSocket;
-			}else if (parseInt == 101) {
-				SkStatus.logInfo("<b>HTTP/1.1 200 Connection established</b>");
-				return this.mSocket;
-			}
+    private Pc() {}
 
 
-			if (httpReponseFirstLine.startsWith("HTTP/") == false) throw new IOException("The proxy did not send back a valid HTTP response.");
-			if (httpReponseFirstLine.length() < 14) throw new IOException("The proxy did not send back a valid HTTP response.");
-			if (httpReponseFirstLine.charAt(8) != ' ') throw new IOException("The proxy did not send back a valid HTTP response.");
-			if (httpReponseFirstLine.charAt(12) != ' ') throw new IOException("The proxy did not send back a valid HTTP response.");
-			if (len < 0 || len > 999) {
-				throw new IOException("The proxy did not send back a valid HTTP response.");
-			} else if (len != 200) {
-				String stringBuffer = new StringBuffer().append(new StringBuffer().append("HTTP/1.0 200 Connection established").append("\r\n").toString()).append("\r\n").toString();
-				out.write(stringBuffer.getBytes());
-				out.flush();
-				SkStatus.logInfo(stringBuffer.toString());
-				return mSocket;
-			} else {
-				return mSocket;
-			}
-
-		}
-
-
-
-		return mSocket;
-	}
-
-
-	private String getRequestPayload(String hostname, int port) {
-		String payload = this.requestPayload;
-
-		if (payload != null) {
-			payload = TunnelUtils.formatCustomPayload(hostname, port, payload);
+    public static final byte[] encrypt(byte[] data, byte[] key) {
+        if (data.length == 0) {
+            return data;
         }
-		else {
-			StringBuffer sb = new StringBuffer();
-
-			sb.append("CONNECT ");
-			sb.append(hostname);
-			sb.append(':');
-			sb.append(port);
-			sb.append(" HTTP/1.0\r\n");
-			if (!(this.proxyUser == null || this.proxyPass == null)) {
-				char[] encoded;
-				String credentials = this.proxyUser + ":" + this.proxyPass;
-				try {
-					encoded = Base64.encode(credentials.getBytes("ISO-8859-1"));
-				} catch (UnsupportedEncodingException e) {
-					encoded = Base64.encode(credentials.getBytes());
-				}
-				sb.append("Proxy-Authorization: Basic ");
-				sb.append(encoded);
-				sb.append("\r\n");
-			}
-			sb.append("\r\n");
-
-			payload = sb.toString();
-		}
-
-		return payload;
-	}
-
-
-
-
-	private Socket doSSLHandshake(Socket socket, String host, String sni, int port) throws IOException {
-        TrustManager[] trustAllCerts = new TrustManager[] {
-			new X509TrustManager() {
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
-				public void checkClientTrusted(
-					java.security.cert.X509Certificate[] certs, String authType) {
-				}
-				public void checkServerTrusted(
-					java.security.cert.X509Certificate[] certs, String authType) {
-				}
-			}
-		};
+        return toByteArray(
+            encrypt(toIntArray(data, true), toIntArray(fixKey(key), false)), false);
+    }
+    public static final byte[] encrypt(String data, byte[] key) {
         try {
-            SSLContext sSLContext = SSLContext.getInstance("SSL");
-            KeyManager[] keyManagerArr = null;
-            sSLContext.init(keyManagerArr, trustAllCerts, new SecureRandom());
-            SSLSocket socket3 = (SSLSocket) sSLContext.getSocketFactory().createSocket(socket, host, port, true);
-            if (sSLContext.getSocketFactory() instanceof android.net.SSLCertificateSocketFactory && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-				((android.net.SSLCertificateSocketFactory)sSLContext.getSocketFactory()).setHostname(socket, sni);
-			} else {
-				try {
-					socket.getClass().getMethod("setHostname", String.class).invoke(socket, sni);
-					SkStatus.logInfo("Setting up SNI...");
-				} catch (Throwable e) {
-					// ignore any error, we just can't set the hostname...
-				}
-			}
-			socket3.setEnabledProtocols(socket3.getSupportedProtocols());
-            socket3.addHandshakeCompletedListener(new HandshakeTunnelCompletedListener(host, port, socket3));
-            SkStatus.logInfo("Starting SSL Handshake...");
-			socket3.startHandshake();
-            return socket3;
-        } catch (Exception e) {
-            IOException iOException = new IOException(new StringBuffer().append("Could not do SSL handshake: ").append(e).toString());
-            throw iOException;
+            return encrypt(data.getBytes("UTF-8"), key);
+        }
+        catch (UnsupportedEncodingException e) {
+            return null;
         }
     }
-
-
-	private SSLSocket doSSLHandshake(String host, String sni, int port) throws IOException {
+    public static final byte[] encrypt(byte[] data, String key) {
         try {
-			TLSSocketFactory tsf = new TLSSocketFactory();
-            SSLSocket socket = (SSLSocket) tsf.createSocket(host, port);
-			try {
-				socket.getClass().getMethod("setHostname", String.class).invoke(socket, sni);
-				SkStatus.logInfo("Setting up SNI...");
-			} catch (Throwable e) {
-				// ignore any error, we just can't set the hostname...
-			}
-
-			//socket.setEnabledProtocols(socket.getSupportedProtocols());
-            socket.addHandshakeCompletedListener(new HandshakeTunnelCompletedListener(host, port, socket));
-            SkStatus.logInfo("Starting SSL Handshake...");
-			socket.startHandshake();
-			return socket;
-        } catch (Exception e) {
-            IOException iOException = new IOException(new StringBuffer().append("Could not do SSL handshake: ").append(e).toString());
-            throw iOException;
+            return encrypt(data, key.getBytes("UTF-8"));
+        }
+        catch (UnsupportedEncodingException e) {
+            return null;
         }
     }
+    public static final byte[] encrypt(String data, String key) {
+        try {
+            return encrypt(data.getBytes("UTF-8"), key.getBytes("UTF-8"));
+        }
+        catch (UnsupportedEncodingException e) {
+            return null;
+        }
+    }
+    public static final String h(byte[] data, byte[] key) {
+        byte[] bytes = encrypt(data, key);
+        if (bytes == null) return null;
+        return TeaBase64.encode(bytes);
+    }
+    public static final String j(String data, byte[] key) {
+        byte[] bytes = encrypt(data, key);
+        if (bytes == null) return null;
+        return TeaBase64.encode(bytes);
+    }
+    public static final String f(byte[] data, String key) {
+        byte[] bytes = encrypt(data, key);
+        if (bytes == null) return null;
+        return TeaBase64.encode(bytes);
+    }
+    public static final String e(String data, String key) {
+        byte[] bytes = encrypt(data, key);
+        if (bytes == null) return null;
+        return TeaBase64.encode(bytes);
+    }
+    public static final byte[] decrypt(byte[] data, byte[] key) {
+        if (data.length == 0) {
+            return data;
+        }
+        return toByteArray(
+            decrypt(toIntArray(data, false), toIntArray(fixKey(key), false)), true);
+    }
+    public static final byte[] decrypt(byte[] data, String key) {
+        try {
+            return decrypt(data, key.getBytes("UTF-8"));
+        }
+        catch (UnsupportedEncodingException e) {
+            return null;
+        }
+    }
+    public static final byte[] d(String data, byte[] key) {
+        return decrypt(TeaBase64.decode(data), key);
+    }
+    public static final byte[] c(String data, String key) {
+        return decrypt(TeaBase64.decode(data), key);
+    }
+    public static final String b(byte[] data, byte[] key) {
+        try {
+            byte[] bytes = decrypt(data, key);
+            if (bytes == null) return null;
+            return new String(bytes, "UTF-8");
+        }
+        catch (UnsupportedEncodingException ex) {
+            return null;
+        }
+    }
+    public static final String a(byte[] data, String key) {
+        try {
+            byte[] bytes = decrypt(data, key);
+            if (bytes == null) return null;
+            return new String(bytes, "UTF-8");
+        }
+        catch (UnsupportedEncodingException ex) {
+            return null;
+        }
+    }
+    public static final String p(String data, byte[] key) {
+        try {
+            byte[] bytes = decrypt(TeaBase64.decode(data), key);
+            if (bytes == null) return null;
+            return new String(bytes, "UTF-8");
+        }
+        catch (UnsupportedEncodingException ex) {
+            return null;
+        }
+    }
+    public static final String o(String data, String key) {
+        try {
+            byte[] bytes = decrypt(TeaBase64.decode(data), key);
+            if (bytes == null) return null;
+            return new String(bytes, "UTF-8");
+        }
+        catch (UnsupportedEncodingException ex) {
+            return null;
+        }
+    }
+
+
+    private static int[] encrypt(int[] v, int[] k) {
+        int n = v.length - 1;
+
+
+        if (n < 1) {
+            return v;
+        }
+        int p, q = 6 + 52 / (n + 1);
+        int z = v[n], y, sum = 0, e;
+
+
+        while (q-- > 0) {
+            sum = sum + DELTA;
+            e = sum >>> 2 & 3;
+            for (p = 0; p < n; p++) {
+                y = v[p + 1];
+                z = v[p] += MX(sum, y, z, p, e, k);
+            }
+            y = v[0];
+            z = v[n] += MX(sum, y, z, p, e, k);
+        }
+        return v;
+    }
+
+
+    private static int[] decrypt(int[] v, int[] k) {
+        int n = v.length - 1;
+
+
+        if (n < 1) {
+            return v;
+        }
+        int p, q = 6 + 52 / (n + 1);
+        int z, y = v[0], sum = q * DELTA, e;
+
+
+        while (sum != 0) {
+            e = sum >>> 2 & 3;
+            for (p = n; p > 0; p--) {
+                z = v[p - 1];
+                y = v[p] -= MX(sum, y, z, p, e, k);
+            }
+            z = v[n];
+            y = v[0] -= MX(sum, y, z, p, e, k);
+            sum = sum - DELTA;
+        }
+        return v;
+    }
+
+
+    private static byte[] fixKey(byte[] key) {
+        if (key.length == 16) return key;
+        byte[] fixedkey = new byte[16];
+        if (key.length < 16) {
+            System.arraycopy(key, 0, fixedkey, 0, key.length);
+        }
+        else {
+            System.arraycopy(key, 0, fixedkey, 0, 16);
+        }
+        return fixedkey;
+    }
+
+
+    private static int[] toIntArray(byte[] data, boolean includeLength) {
+        int n = (((data.length & 3) == 0)
+            ? (data.length >>> 2)
+            : ((data.length >>> 2) + 1));
+        int[] result;
+
+
+        if (includeLength) {
+            result = new int[n + 1];
+            result[n] = data.length;
+        }
+        else {
+            result = new int[n];
+        }
+        n = data.length;
+        for (int i = 0; i < n; ++i) {
+            result[i >>> 2] |= (0x000000ff & data[i]) << ((i & 3) << 3);
+        }
+        return result;
+    }
+
+
+    private static byte[] toByteArray(int[] data, boolean includeLength) {
+        int n = data.length << 2;
+
+
+        if (includeLength) {
+            int m = data[data.length - 1];
+            n -= 4;
+            if ((m < n - 3) || (m > n)) {
+                return null;
+            }
+            n = m;
+        }
+        byte[] result = new byte[n];
+
+
+        for (int i = 0; i < n; ++i) {
+            result[i] = (byte) (data[i >>> 2] >>> ((i & 3) << 3));
+        }
+        return result;
+    }
+
 
 }
+
+
+
