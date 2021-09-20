@@ -1,268 +1,191 @@
-package http.socialtech.tunnel.tunnel;
+private void ShowServer(){
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.server_list);      
+        bottomSheetDialog.setCancelable(true);
+        ServerAdapter mAdapter = new ServerAdapter(this, prefs.getInt("ServerPos",0) , serverList);
+        RecyclerView recyclerView = (RecyclerView)bottomSheetDialog.findViewById(R.id.recycler_view);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);             
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(mLayoutManager); 
+        recyclerView.scrollToPosition(prefs.getInt("ServerPos", 0));        
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, 
+                                                recyclerView, new RecyclerTouchListener.ClickListener() {
 
-import android.content.Context;
-import com.trilead.ssh2.HTTPProxyException;
-import com.trilead.ssh2.ProxyData;
-import com.trilead.ssh2.crypto.Base64;
-import com.trilead.ssh2.sftp.Packet;
-import com.trilead.ssh2.transport.ClientServerHello;
-import http.socialtech.tunnel.logger.SkStatus;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.channels.SocketChannel;
-import java.security.SecureRandom;
-import javax.net.ssl.HandshakeCompletedEvent;
-import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+                                                    @Override                                                           
+                                                    public void onClick(View view, int p3) {
+                                                        prefs.edit().putInt("ServerPos", p3).commit();              
+                                                        parseSelectedServer(p3);
+                                                        SUpdateView();                                          
+                                                        bottomSheetDialog.dismiss();
 
-public class SSLProxy implements ProxyData
-{
-	private Context mContext;
-
-	@Override
-	public void close()
-	{
-		if (mSocket == null) return;
-
-		try {
-			mSocket.close();
-		} catch (IOException e) { /* failed */ }
-	}
-
-	class HandshakeTunnelCompletedListener implements HandshakeCompletedListener {
-        private final String val$host;
-        private final int val$port;
-        private final SSLSocket val$sslSocket;
-
-        HandshakeTunnelCompletedListener( String str, int i, SSLSocket sSLSocket) {
-            this.val$host = str;
-            this.val$port = i;
-            this.val$sslSocket = sSLSocket;
-        }
-
-        public void handshakeCompleted(HandshakeCompletedEvent handshakeCompletedEvent) {
-		/*	SkStatus.logInfo("SSL: Using cipher " + handshakeCompletedEvent.getSession().getCipherSuite());
-			SkStatus.logInfo("SSL: Using protocol " + handshakeCompletedEvent.getSession().getProtocol());*/
-			SkStatus.logInfo("SSL: Handshake finished");
-        }
+                                                    }                                                                                
+                                                    @Override                                                                        
+                                                    public void onLongClick(View view, int position) {}                                                                              
+                                                }));
+        bottomSheetDialog.show();
     }
+    private void ShowPayload(){
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);       
+        bottomSheetDialog.setContentView(R.layout.payload_list);         
+        bottomSheetDialog.setCancelable(true);
+        PayloadAdapter tweakAdapt = new PayloadAdapter(this, prefs.getInt("TweakPos", 0) , payloadList);
+        final RecyclerView recyclerView = (RecyclerView)bottomSheetDialog.findViewById(R.id.recycler_view);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(mLayoutManager);       
+        recyclerView.scrollToPosition(prefs.getInt("TweakPos", 0)); 
+        recyclerView.setAdapter(tweakAdapt);
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, 
+                                                recyclerView, new RecyclerTouchListener.ClickListener() {   
 
-
-	private  String proxyHost;
-    private  String proxyPass;
-    private int proxyPort;
-    private  String proxyUser;
-    private String requestPayload;
-
-	private String stunnelServer;
-	private int stunnelPort = 443;
-	private String stunnelHostSNI;;
-	private Socket mSocket;
-
-	public SSLProxy(String server, int port, String hostSni, String requestPayload) {
-		this.stunnelServer = server;
-		this.stunnelPort = port;
-		this.stunnelHostSNI = hostSni;
-		this.proxyUser = null;
-		this.proxyPass = null;
-		this.requestPayload = requestPayload;
-	}
-
-	@Override
-	public Socket openConnection(String hostname, int port, int connectTimeout, int readTimeout) throws IOException
-	{
-
-
-		mSocket = SocketChannel.open().socket();
-		mSocket.connect(new InetSocketAddress(stunnelServer, stunnelPort));
-
-		if (mSocket.isConnected())
-		{
-			mSocket = doSSLHandshake(hostname, stunnelHostSNI, port);
-			//SkStatus.logInfo(R.string.state_proxy_running);
-
-			String requestPayload = getRequestPayload(hostname, port);
-
-			OutputStream out = mSocket.getOutputStream();
-			// suporte a [split] na payload
-			if (!TunnelUtils.injectSplitPayload(requestPayload, out)) {
-				try {
-					out.write(requestPayload.getBytes("ISO-8859-1"));
-				} catch (UnsupportedEncodingException e2) {
-					out.write(requestPayload.getBytes());
-				}
-				out.flush();
-			}
-
-			byte[] buffer = new byte[1024];
-			InputStream in = mSocket.getInputStream();
-
-			int len = ClientServerHello.readLineRN(in, buffer);
-
-			String httpReponseFirstLine = "";
-			try {
-				httpReponseFirstLine = new String(buffer, 0, len, "ISO-8859-1");
-			} catch (UnsupportedEncodingException e3) {
-				httpReponseFirstLine = new String(buffer, 0, len);
-			}
-			StringBuilder sb = new StringBuilder();
-			sb.append("<strong>");
-			sb.append(httpReponseFirstLine);
-			sb.append("</strong>");
-			SkStatus.logInfo(sb.toString());
-			len = Integer.parseInt(httpReponseFirstLine.substring(9, 12));
-			if (len != 200) {
-				String asw = String.valueOf(len);
-				String replacw = httpReponseFirstLine.replace(httpReponseFirstLine, "HTTP/1.1 200 Ok");
-				SkStatus.logInfo("Proxy: Auto Replace Header");
-				StringBuilder su = new StringBuilder();
-				su.append("<strong>");
-				su.append(replacw);
-				su.append("</strong>");
-				//Status.logInfo(su.toString());
-				len = Integer.parseInt(asw.replace(asw, "200"));
-			} else {
-				return mSocket;
-			}
-
-			// lê o restante
-			String httpReponseAll = httpReponseFirstLine;
-			while ((len = ClientServerHello.readLineRN(in, buffer)) != 0) {
-				httpReponseAll += "\n";
-				try {
-					httpReponseAll += new String(buffer, 0, len, "ISO-8859-1");
-				} catch (UnsupportedEncodingException e3) {
-					httpReponseAll += new String(buffer, 0, len);
-				}
-			}
-
-			if (!httpReponseAll.isEmpty())
-				SkStatus.logDebug(httpReponseAll);
-
-			if (httpReponseFirstLine.startsWith("HTTP/") == false) throw new IOException("The proxy did not send back a valid HTTP response.");
-			if (httpReponseFirstLine.length() < 14) throw new IOException("The proxy did not send back a valid HTTP response.");
-			if (httpReponseFirstLine.charAt(8) != ' ') throw new IOException("The proxy did not send back a valid HTTP response.");
-			if (httpReponseFirstLine.charAt(12) != ' ') throw new IOException("The proxy did not send back a valid HTTP response.");
-			if (len < 0 || len > 999) {
-				throw new IOException("The proxy did not send back a valid HTTP response.");
-			} else if (len != 200) {
-				String stringBuffer = new StringBuffer().append(new StringBuffer().append("HTTP/1.0 200 Connection established").append("\r\n").toString()).append("\r\n").toString();
-				out.write(stringBuffer.getBytes());
-				out.flush();
-				SkStatus.logInfo(stringBuffer.toString());
-				return mSocket;
-			} else {
-				return mSocket;
-			}
-		}
-		return mSocket;
-	}
-
-
-	private String getRequestPayload(String hostname, int port) {
-		String payload = this.requestPayload;
-
-		if (payload != null) {
-			payload = TunnelUtils.formatCustomPayload(hostname, port, payload);
-        }
-		else {
-			StringBuffer sb = new StringBuffer();
-
-			sb.append("CONNECT ");
-			sb.append(hostname);
-			sb.append(':');
-			sb.append(port);
-			sb.append(" HTTP/1.0\r\n");
-			if (!(this.proxyUser == null || this.proxyPass == null)) {
-				char[] encoded;
-				String credentials = this.proxyUser + ":" + this.proxyPass;
-				try {
-					encoded = Base64.encode(credentials.getBytes("ISO-8859-1"));
-				} catch (UnsupportedEncodingException e) {
-					encoded = Base64.encode(credentials.getBytes());
-				}
-				sb.append("Proxy-Authorization: Basic ");
-				sb.append(encoded);
-				sb.append("\r\n");
-			}
-			sb.append("\r\n");
-
-			payload = sb.toString();
-		}
-
-		return payload;
-	}
-
-	private Socket doSSLHandshake(Socket socket, String host, String sni, int port) throws IOException {
-        TrustManager[] trustAllCerts = new TrustManager[] {
-			new X509TrustManager() {
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
-				public void checkClientTrusted(
-					java.security.cert.X509Certificate[] certs, String authType) {
-				}
-				public void checkServerTrusted(
-					java.security.cert.X509Certificate[] certs, String authType) {
-				}
-			}
-		};
+                                                    @Override                                                                                    
+                                                    public void onClick(View view, int p3) {                                                     
+                                                        prefs.edit().putInt("TweakPos",p3).commit();
+                                                        parseSelectedNetwork(p3);                                 
+                                                        PUpdateView();                                                
+                                                        bottomSheetDialog.dismiss();                                                  
+                                                    }                                                           
+                                                    @Override                                               
+                                                    public void onLongClick(View view, int position) {}                                         
+                                                }));
+        bottomSheetDialog.show();
+    }
+    private void parseSelectedServer(int pos1){
         try {
-            SSLContext sSLContext = SSLContext.getInstance("SSL");
-            KeyManager[] keyManagerArr = null;
-            sSLContext.init(keyManagerArr, trustAllCerts, new SecureRandom());
-            SSLSocket socket3 = (SSLSocket) sSLContext.getSocketFactory().createSocket(socket, host, port, true);
-            if (sSLContext.getSocketFactory() instanceof android.net.SSLCertificateSocketFactory && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-				((android.net.SSLCertificateSocketFactory)sSLContext.getSocketFactory()).setHostname(socket, sni);
-			} else {
-				try {
-					socket.getClass().getMethod("setHostname", String.class).invoke(socket, sni);
-					SkStatus.logInfo("Setting up SNI...");
-				} catch (Throwable e) {
-					// ignore any error, we just can't set the hostname...
-				}
-			}
-			socket3.setEnabledProtocols(socket3.getSupportedProtocols());
-            socket3.addHandshakeCompletedListener(new HandshakeTunnelCompletedListener(host, port, socket3));
-            SkStatus.logInfo("Starting SSL Handshake...");
-			socket3.startHandshake();
-            return socket3;
-        } catch (Exception e) {
-            IOException iOException = new IOException(new StringBuffer().append("Could not do SSL handshake: ").append(e).toString());
-            throw iOException;
+            if (pos1 == 0) {                
+                JSONArray jarr = config.getServersArray();
+                JSONObject obj = jarr.getJSONObject(Utils.nextIntInRange(0, jarr.length(), new Random()));
+                prefs.edit().putString("SSHName", "Random").apply();
+                prefs.edit().putString(Settings.SERVIDOR_KEY, obj.getString("ServerIP")).apply();
+                prefs.edit().putString("SSH_Port" ,obj.getString("ServerPort")).apply();
+                prefs.edit().putString("SSL_Port" ,obj.getString("SSLPort")).apply();                                           
+                prefs.edit().putString(Settings.PROXY_IP_KEY, obj.getString("ProxyIP")).apply();
+                prefs.edit().putString(Settings.PROXY_PORTA_KEY, obj.getString("ProxyPort")).apply();   
+                prefs.edit().putString(Settings.USUARIO_KEY, obj.getString("ServerUser")).apply();
+                prefs.edit().putString(Settings.SENHA_KEY, obj.getString("ServerPass")).apply();            
+            } else {
+                JSONArray jarr = config.getServersArray();
+                JSONObject obj = jarr.getJSONObject(pos1-1);                    
+                prefs.edit().putString("SSHName", obj.getString("Name")).apply();
+                prefs.edit().putString(Settings.SERVIDOR_KEY, obj.getString("ServerIP")).apply();
+                prefs.edit().putString("SSH_Port" ,obj.getString("ServerPort")).apply();
+                prefs.edit().putString("SSL_Port" ,obj.getString("SSLPort")).apply();                                   
+                prefs.edit().putString(Settings.PROXY_IP_KEY, obj.getString("ProxyIP")).apply();
+                prefs.edit().putString(Settings.PROXY_PORTA_KEY, obj.getString("ProxyPort")).apply();
+                prefs.edit().putString(Settings.USUARIO_KEY, obj.getString("ServerUser")).apply();
+                prefs.edit().putString(Settings.SENHA_KEY, obj.getString("ServerPass")).apply();
+            }
+        } catch (JSONException e){  
+            e.printStackTrace();            
         }
     }
-
-
-	private SSLSocket doSSLHandshake(String host, String sni, int port) throws IOException {
+    private void parseSelectedNetwork(int pos2) {   
         try {
-			TLSSocketFactory tsf = new TLSSocketFactory();
-            SSLSocket socket = (SSLSocket) tsf.createSocket(host, port);
-			try {
-				socket.getClass().getMethod("setHostname", String.class).invoke(socket, sni);
-				SkStatus.logInfo("Setting up SNI...");
-			} catch (Throwable e) {
-				// ignore any error, we just can't set the hostname...
-			}
-
-			//socket.setEnabledProtocols(socket.getSupportedProtocols());
-            socket.addHandshakeCompletedListener(new HandshakeTunnelCompletedListener(host, port, socket));
-            SkStatus.logInfo("Starting SSL Handshake...");
-			socket.startHandshake();
-			return socket;
-        } catch (Exception e) {
-            IOException iOException = new IOException(new StringBuffer().append("Could not do SSL handshake: ").append(e).toString());
-            throw iOException;
+            if(pos2 == 0){     
+                prefs.edit().putInt(Settings.TUNNELTYPE_KEY, Settings.bTUNNEL_TYPE_SSH_PROXY).apply();
+                prefs.edit().putBoolean("isSSL_2", false).apply();
+                prefs.edit().putString("TweakName", "Direct").apply();      
+                String Payload = "CONNECT [host_port] [protocol][crlf]Host: edge-star-shv-01-any2.facebook.com[crlf]X-Online-Host: edge-star-shv-01-any2.facebook.com[crlf]X-Forward-Host: edge-star-shv-01-any2.facebook.com[crlf]Connection: Keep-Alive[crlf][crlf]";
+                prefs.edit().putString(Settings.CUSTOM_PAYLOAD_KEY, Payload).apply();
+            } else {
+                JSONArray jarr = config.getNetworksArray();                                                        
+                JSONObject obj = jarr.getJSONObject(pos2-1);
+                prefs.edit().putString("TweakName" ,obj.getString("Name")).apply();
+                boolean isSSL = obj.getBoolean("isSSL");           
+                boolean PAYSSL = obj.getBoolean("PAYSSL");         
+                if (isSSL) {   
+                    prefs.edit().putInt(Settings.TUNNELTYPE_KEY, Settings.bTUNNEL_TYPE_SSH_SSL).apply();
+                    prefs.edit().putBoolean("isSSL_2", obj.getBoolean("isSSL")).apply();
+                    prefs.edit().putString(Settings.CUSTOM_PAYLOAD_KEY, obj.getString("SNI")).apply();
+                } else if (PAYSSL){    
+                   // prefs.edit().putInt(Settings.TUNNELTYPE_KEY, Settings.bTUNNEL_TYPE_PAY_SSL).apply();                
+                   // prefs.edit().putBoolean("isSSL_2", obj.getBoolean("isSSL")).apply();
+                   // prefs.edit().putString(Settings.CUSTOM_PAYLOAD_KEY, obj.getString("Payload")).apply();
+                   // prefs.edit().putString(Settings.CUSTOM_SNI, obj.getString("SNI")).apply();
+                } else {   
+                    prefs.edit().putInt(Settings.TUNNELTYPE_KEY, Settings.bTUNNEL_TYPE_SSH_PROXY).apply();
+                    prefs.edit().putBoolean("isSSL_2", obj.getBoolean("isSSL")).apply();
+                    prefs.edit().putString(Settings.CUSTOM_PAYLOAD_KEY, obj.getString("Payload")).apply();
+                }  
+            }
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
+    private void loadServer() {
+        try { 
+            HashMap<String, String> mapp = new HashMap<String, String>();
+            mapp.put("Name", "Random");
+            mapp.put("FLAG", "ic_launcher.png");
+            serverList.add(mapp);
+            for (int i = 0; i < config.getServersArray().length(); i++) {
+                JSONObject obj = config.getServersArray().getJSONObject(i);
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("Name", obj.getString("Name"));
+                map.put("FLAG", obj.getString("FLAG")+".png");
+                serverList.add(map);                
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
-}
+    private void loadNetworks() {       
+        try {  
+            HashMap<String, String> mapp = new HashMap<String, String>();
+            mapp.put("Name", "Direct");
+            mapp.put("Network", "ic_launcher.png");
+            payloadList.add(mapp);
+            for (int i = 0; i < config.getNetworksArray().length(); i++) {
+                JSONObject obj = config.getNetworksArray().getJSONObject(i);           
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("Name", obj.getString("Name"));
+                map.put("Network", obj.getString("Network")+".png");
+                payloadList.add(map);
+            }
 
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    private void SUpdateView() {
+        try {       
+            Sname.setText(prefs.getString("SSHName","Random"));
+            InputStream inputStream = getApplicationContext().getAssets().open("flags/" + serverList.get(prefs.getInt("ServerPos", 0)).get("FLAG"));            
+            Sicon.setImageDrawable(Drawable.createFromStream(inputStream, serverList.get(prefs.getInt("ServerPos", 0)).get("FLAG")));           
+            if (inputStream != null) {          
+                inputStream.close();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }                                                             
+    }
+
+    private void PUpdateView() {        
+        try {       
+            Pname.setText(prefs.getString("TweakName","Direct"));
+            InputStream inputStream = getApplicationContext().getAssets().open("network/" + payloadList.get(prefs.getInt("TweakPos", 0)).get("Network"));           
+            Picon.setImageDrawable(Drawable.createFromStream(inputStream, payloadList.get(prefs.getInt("TweakPos", 0)).get("Network")));            
+            if (inputStream != null) {          
+                inputStream.close();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }                                                                   
+    }
+    private synchronized void doSaveData() {                   
+        if (mainLayout != null && !isFinishing()){
+            mainLayout.requestFocus();
+        } 
+        parseSelectedServer(prefs.getInt("ServerPos", 0));
+        parseSelectedNetwork(prefs.getInt("TweakPos", 0));
+
+        if (!prefs.getBoolean("isSSL_2", false)) {          
+            String ssh_port = prefs.getString("SSH_Port","");                               
+            prefs.edit().putString(Settings.SERVIDOR_PORTA_KEY, ssh_port).apply();
+        } else {
+            String ssl_port = prefs.getString("SSL_Port","");   
+            prefs.edit().putString(Settings.SERVIDOR_PORTA_KEY, ssl_port).apply();
+        }   
+    }
