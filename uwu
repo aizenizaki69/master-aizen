@@ -1,128 +1,43 @@
-class HandshakeTunnelCompletedListener implements HandshakeCompletedListener {
-        private final String val$host;
-        private final int val$port;
-        private final SSLSocket val$sslSocket;
-
-        HandshakeTunnelCompletedListener( String str, int i, SSLSocket sSLSocket) {
-            this.val$host = str;
-            this.val$port = i;
-            this.val$sslSocket = sSLSocket;
-        }
-
-        public void handshakeCompleted(HandshakeCompletedEvent handshakeCompletedEvent) {
-			//SkStatus.logInfo(new StringBuffer().append("<b>Established ").append(handshakeCompletedEvent.getSession().getProtocol()).append(" connection with ").append(/*val$host*/"********").append(":").append(this.val$port).append(" using ").append(handshakeCompletedEvent.getCipherSuite()).append("</b>").toString());
-			//SkStatus.logInfo(new StringBuffer().append("<b>Established ").append(handshakeCompletedEvent.getSession().getProtocol()).append(" connection ").append("using ").append(handshakeCompletedEvent.getCipherSuite()).append("</b>").toString());
-			//SkStatus.logInfo(new StringBuffer().append("Supported cipher suites: ").append(Arrays.toString(this.val$sslSocket.getSupportedCipherSuites())).toString());
-			//SkStatus.logInfo(new StringBuffer().append("Enabled cipher suites: ").append(Arrays.toString(this.val$sslSocket.getEnabledCipherSuites())).toString());
-            //SkStatus.logInfo(new StringBuffer().append("SSL: Supported protocols: <br>").append(Arrays.toString(val$sslSocket.getSupportedProtocols())).toString().replace("[", "").replace("]", "").replace(",", "<br>"));
-			SkStatus.logInfo(new StringBuffer().append("SSL: Enabled protocols: <br>").append(Arrays.toString(val$sslSocket.getEnabledProtocols())).toString().replace("[", "").replace("]", "").replace(",", "<br>"));
-			//SkStatus.logInfo("SSL: Using cipher " + handshakeCompletedEvent.getSession().getCipherSuite());
-			SkStatus.logInfo("SSL: Using protocol " + handshakeCompletedEvent.getSession().getProtocol());
-			SkStatus.logInfo("SSL: Handshake finished");
-        }
-    }
-
-	private String stunnelServer;
-	private int stunnelPort = 443;
-	private String stunnelHostSNI;
-	public Context mContext;
-	private Socket mSocket;
-
-	public SSLTunnelProxy(String server, int port, String hostSni,Context con) {
-		this.mContext = con;
-		this.stunnelServer = server;
-		this.stunnelPort = port;
-		this.stunnelHostSNI = hostSni;
-	}
-
-	@Override
-	public Socket openConnection(String hostname, int port, int connectTimeout, int readTimeout) throws IOException
-	{
-		mSocket = SocketChannel.open().socket();
-		mSocket.connect(new InetSocketAddress(stunnelServer, stunnelPort));
-
-		if (mSocket.isConnected()) {
-			mSocket = doSSLHandshake(hostname, stunnelHostSNI, port);
-		}
-		// anti vpn sniffer
-		if (TunnelUtils.isActiveVpn(mContext)) {
-			SkStatus.logInfo("<strong>" + mContext.getString(R.string.error_vpn_sniffer_detected) + "</strong>");
-
-			throw new IOException("error detected");
-		}
-		return mSocket;
-	}
-
-	private Socket doSSLHandshake(Socket socket, String host, String sni, int port) throws IOException {
-        TrustManager[] trustAllCerts = new TrustManager[] {
-			new X509TrustManager() {
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
-				public void checkClientTrusted(
-					java.security.cert.X509Certificate[] certs, String authType) {
-				}
-				public void checkServerTrusted(
-					java.security.cert.X509Certificate[] certs, String authType) {
-				}
-			}
-		};
-        try {
-            SSLContext sSLContext = SSLContext.getInstance("SSL");
-            KeyManager[] keyManagerArr = null;
-            sSLContext.init(keyManagerArr, trustAllCerts, new SecureRandom());
-            SSLSocket socket3 = (SSLSocket) sSLContext.getSocketFactory().createSocket(socket, host, port, true);
-            if (sSLContext.getSocketFactory() instanceof android.net.SSLCertificateSocketFactory && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-				((android.net.SSLCertificateSocketFactory)sSLContext.getSocketFactory()).setHostname(socket, sni);
-			} else {
-				try {
-					socket.getClass().getMethod("setHostname", String.class).invoke(socket, sni);
-					//SkStatus.logInfo("Setting up SNI: "+sni);
-				} catch (Throwable e) {
-					// ignore any error, we just can't set the hostname...
-				}
-			}
-			socket3.setEnabledProtocols(socket3.getSupportedProtocols());
-            socket3.addHandshakeCompletedListener(new HandshakeTunnelCompletedListener(host, port, socket3));
-            //SkStatus.logInfo("Starting SSL Handshake...");
-			socket3.startHandshake();
-            return socket3;
-        } catch (Exception e) {
-            IOException iOException = new IOException(new StringBuffer().append("Could not do SSL handshake: ").append(e).toString());
-            throw iOException;
-        }
-    }
-
-	private SSLSocket doSSLHandshake(String host, String sni, int port) throws IOException {
-        try {
-			TLSSocketFactory tsf = new TLSSocketFactory();
-            SSLSocket socket = (SSLSocket) tsf.createSocket(host, port);
-			try {
-				socket.getClass().getMethod("setHostname", String.class).invoke(socket, sni);
-				//SkStatus.logInfo("Setting up SNI: "+sni);
-			} catch (Throwable e) {
-				// ignore any error, we just can't set the hostname...
-			}
-
-			socket.setEnabledProtocols(socket.getSupportedProtocols());
-            socket.addHandshakeCompletedListener(new HandshakeTunnelCompletedListener(host, port, socket));
-            SkStatus.logInfo("Starting SSL Handshake...");
-			socket.startHandshake();
-			return socket;
-        } catch (Exception e) {
-            IOException iOException = new IOException(new StringBuffer().append("Could not do SSL handshake: ").append(e).toString());
-            throw iOException;
-        }
-    }
-
-	@Override
-	public void close()
-	{
-		try {
-			if (mSocket != null) {
-				mSocket.close();
-			}
-		} catch(IOException e) {}
-	}
-
-}
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent" style="@style/MainBg">
+	<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+		<RelativeLayout android:id="@id/rlTop" android:layout_width="fill_parent" android:layout_height="140.0dip">
+			<RelativeLayout android:orientation="vertical" android:id="@id/llTitle" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="12.0dip">
+				<ImageView android:background="@drawable/bg_share" android:padding="8.0dip" android:layout_width="36.0dip" android:layout_height="36.0dip" android:scaleType="fitXY" android:layout_centerVertical="true" android:layout_marginStart="12.0dip" />
+				<ImageView android:id="@id/menu" android:background="?selectableItemBackgroundBorderless" android:padding="8.0dip" android:layout_width="36.0dip" android:layout_height="36.0dip" android:src="@drawable/icons_menu" android:scaleType="fitXY" android:tint="@color/colorOpposite" android:layout_centerVertical="true" android:layout_marginStart="12.0dip" />
+				<ImageView android:background="@drawable/bg_share" android:padding="8.0dip" android:layout_width="36.0dip" android:layout_height="36.0dip" android:scaleType="fitXY" android:layout_alignParentRight="true" android:layout_centerVertical="true" android:layout_marginEnd="12.0dip" />
+				<ImageView android:id="@id/theme" android:background="?selectableItemBackgroundBorderless" android:padding="8.0dip" android:layout_width="36.0dip" android:layout_height="36.0dip" android:src="@drawable/sun" android:scaleType="fitXY" android:tint="@color/colorOpposite" android:layout_alignParentRight="true" android:layout_centerVertical="true" android:layout_marginEnd="12.0dip" />
+				<LinearLayout android:gravity="center" android:layout_width="wrap_content" android:layout_height="40.0dip" android:layout_centerInParent="true">
+					<TextView android:textSize="20.0sp" android:textColor="@color/colorOpposite" android:id="@id/titletxt" android:paddingBottom="2.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rapid Inject" />
+					<TextView android:textSize="20.0sp" android:textColor="#ffb40404" android:id="@id/titletxt2" android:paddingBottom="2.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" PRO" />
+				</LinearLayout>
+			</RelativeLayout>
+		</RelativeLayout>
+		<RelativeLayout android:id="@id/rlMiddle" android:layout_width="fill_parent" android:layout_height="180.0dip" android:layout_marginTop="-36.0dip" android:layout_below="@id/rlTop">
+			<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="52.0dip">
+				<TextView android:textSize="15.0sp" android:textColor="@color/colorOpposite" android:gravity="center" android:id="@id/bytesOut" android:layout_width="0.0dip" android:layout_height="fill_parent" android:layout_weight="1.0" />
+				<View android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="2.0" />
+				<TextView android:textSize="15.0sp" android:textColor="@color/colorOpposite" android:gravity="center" android:id="@id/bytesIn" android:layout_width="0.0dip" android:layout_height="fill_parent" android:layout_weight="1.0" />
+			</LinearLayout>
+			<ImageView android:id="@id/ivCurve" android:layout_width="fill_parent" android:layout_height="96.0dip" android:src="@drawable/bottom_curve" android:scaleType="fitXY" android:tint="@color/colorPrimary" android:layout_centerHorizontal="true" />
+			<RelativeLayout android:background="@color/colorPrimary" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginTop="-5.0dip" android:layout_below="@id/ivCurve" />
+			<RelativeLayout android:id="@id/relConnect" android:layout_width="150.0dip" android:layout_height="150.0dip" android:layout_centerInParent="true" style="@style/CircleBorderBg">
+				<de.hdodenhof.circleimageview.CircleImageView android:id="@id/ivPowerBack" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="18.0dip" style="@style/CircleBg" />
+				<ImageView android:id="@id/activity_starterButtonMain" android:paddingBottom="8.0dip" android:layout_width="72.0dip" android:layout_height="72.0dip" android:src="@drawable/antenna_disconnect" android:layout_centerInParent="true" android:paddingStart="8.0dip" />
+				<RelativeLayout android:layout_width="56.0dip" android:layout_height="56.0dip" android:layout_marginTop="16.0dip">
+					<de.hdodenhof.circleimageview.CircleImageView android:layout_width="fill_parent" android:layout_height="fill_parent" android:src="@color/colorPrimary" />
+					<de.hdodenhof.circleimageview.CircleImageView android:id="@id/civCenter" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="20.0dip" />
+					<com.technore.rapidinjectpro.view.RipplePulseLayout android:id="@id/layout_ripplepulse" android:clipChildren="true" android:layout_width="fill_parent" android:layout_height="fill_parent" app:rippleColor="#ff14e61a" app:rippleType="stroke" app:startRadius="10.0dip" app:endRadius="25.0dip" app:duration="1800" app:strokeWidth="2.0dip" />
+					<ImageView android:id="@id/civSelectedCountry" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="12.0dip" android:src="@drawable/ic_launcher" />
+				</RelativeLayout>
+			</RelativeLayout>
+		</RelativeLayout>
+	</LinearLayout>
+	<LinearLayout android:orientation="vertical" android:background="@color/colorPrimary" android:paddingTop="15.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingStart="20.0dip" android:paddingEnd="20.0dip">
+		<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+			<TextView android:textSize="18.0sp" android:textColor="@color/colorOpposite" android:gravity="center_horizontal" android:id="@id/vpn_status" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Tap to Connect" />
+		</LinearLayout>
+		<TextView android:textSize="14.0sp" android:textColor="@color/colorOpposite" android:layout_gravity="center_horizontal" android:id="@id/duration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" android:text="00h:00m:00s" />
+	</LinearLayout>
+	<LinearLayout android:orientation="vertical" android:background="@color/colorPrimary" android:layout_width="fill_parent" android:layout_height="fill_parent" />
+</LinearLayout>
