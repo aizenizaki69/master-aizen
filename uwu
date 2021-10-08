@@ -1,43 +1,55 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent" style="@style/MainBg">
-	<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
-		<RelativeLayout android:id="@id/rlTop" android:layout_width="fill_parent" android:layout_height="140.0dip">
-			<RelativeLayout android:orientation="vertical" android:id="@id/llTitle" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="12.0dip">
-				<ImageView android:background="@drawable/bg_share" android:padding="8.0dip" android:layout_width="36.0dip" android:layout_height="36.0dip" android:scaleType="fitXY" android:layout_centerVertical="true" android:layout_marginStart="12.0dip" />
-				<ImageView android:id="@id/menu" android:background="?selectableItemBackgroundBorderless" android:padding="8.0dip" android:layout_width="36.0dip" android:layout_height="36.0dip" android:src="@drawable/icons_menu" android:scaleType="fitXY" android:tint="@color/colorOpposite" android:layout_centerVertical="true" android:layout_marginStart="12.0dip" />
-				<ImageView android:background="@drawable/bg_share" android:padding="8.0dip" android:layout_width="36.0dip" android:layout_height="36.0dip" android:scaleType="fitXY" android:layout_alignParentRight="true" android:layout_centerVertical="true" android:layout_marginEnd="12.0dip" />
-				<ImageView android:id="@id/theme" android:background="?selectableItemBackgroundBorderless" android:padding="8.0dip" android:layout_width="36.0dip" android:layout_height="36.0dip" android:src="@drawable/sun" android:scaleType="fitXY" android:tint="@color/colorOpposite" android:layout_alignParentRight="true" android:layout_centerVertical="true" android:layout_marginEnd="12.0dip" />
-				<LinearLayout android:gravity="center" android:layout_width="wrap_content" android:layout_height="40.0dip" android:layout_centerInParent="true">
-					<TextView android:textSize="20.0sp" android:textColor="@color/colorOpposite" android:id="@id/titletxt" android:paddingBottom="2.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rapid Inject" />
-					<TextView android:textSize="20.0sp" android:textColor="#ffb40404" android:id="@id/titletxt2" android:paddingBottom="2.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" PRO" />
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:background="@android:color/transparent" android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<android.support.v7.widget.CardView android:id="@id/background" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10.0dip" android:layout_marginRight="10.0dip" android:layout_centerHorizontal="true" android:layout_centerVertical="true" app:cardBackgroundColor="@android:color/white" app:cardCornerRadius="10.0dip" app:cardElevation="16.0dip" app:cardUseCompatPadding="true">
+		<RelativeLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+			<RelativeLayout android:id="@id/relativelayout1" android:layout_width="wrap_content" android:layout_height="wrap_content">
+				<View android:layout_width="fill_parent" android:layout_height="100.0dip" />
+				<ImageView android:id="@id/icon" android:layout_width="50.0dip" android:layout_height="50.0dip" android:layout_centerHorizontal="true" android:layout_centerVertical="true" />
+			</RelativeLayout>
+			<RelativeLayout android:paddingLeft="12.0dip" android:paddingRight="12.0dip" android:paddingBottom="10.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@id/relativelayout1">
+				<TextView android:textSize="18.0dip" android:textStyle="bold" android:gravity="center" android:id="@id/title" android:paddingLeft="16.0dip" android:paddingRight="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:textAlignment="center" />
+				<TextView android:textSize="14.0dip" android:gravity="center" android:id="@id/message" android:paddingLeft="16.0dip" android:paddingRight="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="14.0dip" android:layout_below="@id/title" android:textAlignment="center" />
+				<LinearLayout android:orientation="vertical" android:id="@id/main" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dip" android:layout_below="@id/message">
+					<android.support.design.widget.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+						<EditText android:textSize="12.0dip" android:id="@id/edHost" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="SSH Host" android:singleLine="true" />
+					</android.support.design.widget.TextInputLayout>
+					<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dip">
+						<android.support.design.widget.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+							<EditText android:textSize="12.0dip" android:id="@id/edUser" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="Username" android:singleLine="true" />
+						</android.support.design.widget.TextInputLayout>
+						<android.support.design.widget.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+							<EditText android:textSize="12.0dip" android:id="@id/edPass" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="Password" android:singleLine="true" />
+						</android.support.design.widget.TextInputLayout>
+					</LinearLayout>
+					<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dip">
+						<android.support.design.widget.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+							<EditText android:textSize="12.0dip" android:id="@id/edProxyIP" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="Proxy IP" android:singleLine="true" />
+						</android.support.design.widget.TextInputLayout>
+						<android.support.design.widget.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+							<EditText android:textSize="12.0dip" android:id="@id/edProxyPort" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="Proxy Port" android:singleLine="true" android:inputType="number" />
+						</android.support.design.widget.TextInputLayout>
+					</LinearLayout>
+					<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dip">
+						<android.support.design.widget.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+							<EditText android:textSize="12.0dip" android:id="@id/edSSH" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="SSH Port" android:singleLine="true" android:inputType="number" />
+						</android.support.design.widget.TextInputLayout>
+						<android.support.design.widget.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+							<EditText android:textSize="12.0dip" android:id="@id/edSSL" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="SSL Port" android:singleLine="true" android:inputType="number" />
+						</android.support.design.widget.TextInputLayout>
+						<android.support.design.widget.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+							<EditText android:textSize="12.0dip" android:id="@id/edDropbear" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="Dropbear" android:singleLine="true" android:inputType="number" />
+						</android.support.design.widget.TextInputLayout>
+					</LinearLayout>
+				</LinearLayout>
+				<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="30.0dip" android:weightSum="100.0" android:layout_below="@id/main">
+					<android.support.v7.widget.CardView android:gravity="center" android:id="@id/negativeBtn" android:clickable="true" android:layout_width="fill_parent" android:layout_height="70.0dip" android:foreground="?selectableItemBackground" android:layout_weight="50.0" android:layout_centerHorizontal="true" android:shape="ring" android:thicknessRatio="1.9" android:innerRadius="0.0dip" android:elevation="5.0dip" app:cardBackgroundColor="@color/colorAccent" app:cardCornerRadius="25.0dip" app:cardUseCompatPadding="true">
+						<TextView android:textSize="15.0dip" android:layout_gravity="center" android:id="@id/negativeTxt" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+					</android.support.v7.widget.CardView>
+					<android.support.v7.widget.CardView android:gravity="center" android:id="@id/positiveBtn" android:clickable="true" android:layout_width="fill_parent" android:layout_height="70.0dip" android:foreground="?selectableItemBackground" android:layout_weight="50.0" android:layout_centerHorizontal="true" android:shape="ring" android:thicknessRatio="1.9" android:innerRadius="0.0dip" android:elevation="5.0dip" app:cardBackgroundColor="@color/colorAccent" app:cardCornerRadius="25.0dip" app:cardUseCompatPadding="true">
+						<TextView android:textSize="15.0dip" android:layout_gravity="center" android:id="@id/positiveTxt" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+					</android.support.v7.widget.CardView>
 				</LinearLayout>
 			</RelativeLayout>
 		</RelativeLayout>
-		<RelativeLayout android:id="@id/rlMiddle" android:layout_width="fill_parent" android:layout_height="180.0dip" android:layout_marginTop="-36.0dip" android:layout_below="@id/rlTop">
-			<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="52.0dip">
-				<TextView android:textSize="15.0sp" android:textColor="@color/colorOpposite" android:gravity="center" android:id="@id/bytesOut" android:layout_width="0.0dip" android:layout_height="fill_parent" android:layout_weight="1.0" />
-				<View android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="2.0" />
-				<TextView android:textSize="15.0sp" android:textColor="@color/colorOpposite" android:gravity="center" android:id="@id/bytesIn" android:layout_width="0.0dip" android:layout_height="fill_parent" android:layout_weight="1.0" />
-			</LinearLayout>
-			<ImageView android:id="@id/ivCurve" android:layout_width="fill_parent" android:layout_height="96.0dip" android:src="@drawable/bottom_curve" android:scaleType="fitXY" android:tint="@color/colorPrimary" android:layout_centerHorizontal="true" />
-			<RelativeLayout android:background="@color/colorPrimary" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginTop="-5.0dip" android:layout_below="@id/ivCurve" />
-			<RelativeLayout android:id="@id/relConnect" android:layout_width="150.0dip" android:layout_height="150.0dip" android:layout_centerInParent="true" style="@style/CircleBorderBg">
-				<de.hdodenhof.circleimageview.CircleImageView android:id="@id/ivPowerBack" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="18.0dip" style="@style/CircleBg" />
-				<ImageView android:id="@id/activity_starterButtonMain" android:paddingBottom="8.0dip" android:layout_width="72.0dip" android:layout_height="72.0dip" android:src="@drawable/antenna_disconnect" android:layout_centerInParent="true" android:paddingStart="8.0dip" />
-				<RelativeLayout android:layout_width="56.0dip" android:layout_height="56.0dip" android:layout_marginTop="16.0dip">
-					<de.hdodenhof.circleimageview.CircleImageView android:layout_width="fill_parent" android:layout_height="fill_parent" android:src="@color/colorPrimary" />
-					<de.hdodenhof.circleimageview.CircleImageView android:id="@id/civCenter" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="20.0dip" />
-					<com.technore.rapidinjectpro.view.RipplePulseLayout android:id="@id/layout_ripplepulse" android:clipChildren="true" android:layout_width="fill_parent" android:layout_height="fill_parent" app:rippleColor="#ff14e61a" app:rippleType="stroke" app:startRadius="10.0dip" app:endRadius="25.0dip" app:duration="1800" app:strokeWidth="2.0dip" />
-					<ImageView android:id="@id/civSelectedCountry" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="12.0dip" android:src="@drawable/ic_launcher" />
-				</RelativeLayout>
-			</RelativeLayout>
-		</RelativeLayout>
-	</LinearLayout>
-	<LinearLayout android:orientation="vertical" android:background="@color/colorPrimary" android:paddingTop="15.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingStart="20.0dip" android:paddingEnd="20.0dip">
-		<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-			<TextView android:textSize="18.0sp" android:textColor="@color/colorOpposite" android:gravity="center_horizontal" android:id="@id/vpn_status" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Tap to Connect" />
-		</LinearLayout>
-		<TextView android:textSize="14.0sp" android:textColor="@color/colorOpposite" android:layout_gravity="center_horizontal" android:id="@id/duration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" android:text="00h:00m:00s" />
-	</LinearLayout>
-	<LinearLayout android:orientation="vertical" android:background="@color/colorPrimary" android:layout_width="fill_parent" android:layout_height="fill_parent" />
-</LinearLayout>
+	</android.support.v7.widget.CardView>
+</RelativeLayout>
