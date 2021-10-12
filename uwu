@@ -1,12 +1,11 @@
 package com.mycompany.myapp.service;
 
-
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.VpnService;
@@ -15,61 +14,29 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import com.mycompany.myapp.R;
 import com.mycompany.myapp.activity.MainActivity;
-import com.mycompany.myapp.core.BackThread;
-import com.mycompany.myapp.core.ProxyThread;
 import com.mycompany.myapp.fragment.HomeFragment;
 import com.mycompany.myapp.logger.VPNLog;
 import com.mycompany.myapp.util.ConfigUtil;
-import com.mycompany.myapp.util.ProfileUtil;
-import com.mycompany.myapp.service.SSHTunnelService;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URL;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import com.mycompany.myapp.core.TLSSocketFactory;
 import com.mycompany.myapp.util.Utility;
-import com.mycompany.myapp.model.Constants;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
-import android.content.Context;
+import java.net.Socket;
 
-public class InjectorService extends Service implements Runnable, Handler.Callback
+public class InjectorService extends Service implements Runnable, Handler.Callback 
 {
     public static final String NOTIFICATION_CHANNEL_ID = "Injector Service";
     private Thread mThread;
     private Handler mHandler;
-    public SSLSocket mSSLSocket;
-    private ServerSocket ss;
-    private Socket client;
-    public Socket server;
     public static boolean isRunning = false;
-    private int repeatCount = 0;
-    private VpnService eVpnService;
-    private HttpsURLConnection huc;
-    private TLSSocketFactory factory;
-    private BackThread mBackServerThread;
     private SharedPreferences sp;
-    private ProfileUtil profile_util;
     private ConfigUtil config_util;
     private WakeLock wakeLock;
     @Override
     public IBinder onBind(Intent p1)
     {
-        // TODO: Implement this method
         return new InjectorBinder();
     }
     public class InjectorBinder extends Binder
@@ -83,7 +50,6 @@ public class InjectorService extends Service implements Runnable, Handler.Callba
     @Override
     public void onCreate(){
         config_util = new ConfigUtil(this);
-        profile_util = ProfileUtil.getProfile(this);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         super.onCreate();
         
@@ -121,12 +87,11 @@ public class InjectorService extends Service implements Runnable, Handler.Callba
         log(getString(R.string.state_injector_stop));
         if (HomeFragment.wake_lock.isChecked()){            
          if (wakeLock != null && wakeLock.isHeld()) {
-         wakeLock.release();
+             wakeLock.release();
 			 log(getString(R.string.state_release_wakelock));
          } 
          } 
         HomeFragment.updateMainViews(this);  
-        repeatCount = 0;
         new Thread(new Runnable() {
 
                 @Override
@@ -142,32 +107,12 @@ public class InjectorService extends Service implements Runnable, Handler.Callba
         isRunning = false;
         // TODO: Implement this method
     }
-    private void closeAll()
-    {
+    private void closeAll() {
         try {
-            if (ss != null) {
-                ss.close();
-            }
-            if (client != null) {
-                client.close();
-            }
-            if (server != null) {
-                server.close();
-                server = null;
-            }
+            
             if (mThread != null) {
                 mThread.interrupt();
             }
-
-            if (huc != null) {
-                huc.disconnect();
-            }
-            if (mBackServerThread != null) {
-                mBackServerThread.Stop();
-			}
-            ss = null;
-            server = null;
-            mSSLSocket = null;
         } catch (Exception e) {
 
         }
@@ -211,332 +156,20 @@ public class InjectorService extends Service implements Runnable, Handler.Callba
         }
         mThread.start();
     }
-    private boolean connectSocket() throws Exception
-    {
-        try {
-            String readLine;
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            StringBuffer stringBuffer = new StringBuffer();
-            while (true) {
-                readLine = bufferedReader.readLine();
-                if (readLine != null && readLine.length() > 0) {
-                    stringBuffer.append(readLine);
-                    stringBuffer.append("\r\n");
-                } else {
-                    break;
-                }
-            }
-            if (stringBuffer.toString().equals("")) {
-                log("Get Request" + "Get request data failed, empty requestline");
-                return false;
-            }
-            int tunnelType = sp.getInt(Constants.TUNNEL_TYPE, Constants.TYPE_SSH);            
-            if (tunnelType == 0) {
-				    String str2 = getString(R.string.state_connection_type);
-                    log("<b>" + str2 +"</b> ➔ " + getString(R.string.state_connection_ssh));                
-                    String c = c(stringBuffer.toString());
-                    if (c == null) {
-                        return false;
-                    }
-                    String proxy = config_util.getProxyIP();
-                    int port = Integer.parseInt(config_util.getProxyPort());
-                    String remote = proxy + ":" + port;
-                    if (profile_util.isRemoteLock()){
-					log(getString(R.string.remote_proxy) + ": Locked");
-                    } else {
-                    log(getString(R.string.remote_proxy) + ": "+ remote);                    
-                    }               
-                    server = new Socket();
-                    server.setTcpNoDelay(true);
-                    server.connect(new InetSocketAddress(proxy, port));
-                    if (!c.equals("")) {
-                        a(c, server);
-                    }
-                    if (!client.isClosed() && server != null && server.isConnected()) {
-                        return true;
-                    }                   
-                } else if (tunnelType == 1) {
-                    String str2 = getString(R.string.state_connection_type);
-					String[] split = stringBuffer.toString().split("\r\n");
-                    String str = split[0].split(" ")[1];
-                    String host = str.split(":")[0];
-                    String port = str.split(":")[1];
-                    log("<b>" + str2 +"</b> ➔ " + getString(R.string.state_connection_ssl));                
-                    connectProxy(host, port);
-                    connectSSL();
-                    send200Status();
-                    if (!client.isClosed() && server.isConnected() && mSSLSocket.isConnected()) {
-                        return true;
-                    }
-                    
-                }            
-        } catch (Exception e) {
-            log(e.getMessage());
-        }
-        return false;
-    }
-    
-    private void connectProxy(String host, String port) throws Exception
-    {
-        server = new Socket();
-        server.bind(new InetSocketAddress(0));
-        server.connect(new InetSocketAddress(host, Integer.parseInt(port)));
-    }
-
-    private void connectSSL() throws Exception
-    {
-        factory = new TLSSocketFactory(this);
-        String mSni = config_util.getCustomSNI();
-        URL url = new URL("https://" + mSni);
-        mSni = url.getHost();
-        if (url.getPort() > 0) {
-            mSni = mSni + ":" + url.getPort();
-        }
-        if (!url.getPath().equals("/")) {
-            mSni = mSni + url.getPath();
-        }
-		String a = getString(R.string.custom_sni_hint);
-		if (profile_util.isCustomSNILock()){
-		log("<b>" + a +": </b>" + "Locked");
-		} else {
-			log("<b>" + a +": </b>" + mSni);
-		}
-        huc = (HttpsURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, mBackServerThread.getLocalSocketAddr()));
-        huc.setHostnameVerifier(new HostnameVerifier() {
-                @SuppressLint({"BadHostnameVerifier"})
-                public boolean verify(String str, SSLSession sSLSession) {
-                    return true;
-                }
-            });
-        huc.setSSLSocketFactory(factory);
-        huc.connect();
-        try {
-			String b = getString(R.string.state_peer_host);
-			String c = getString(R.string.state_peer_principal);
-            SSLSession session = mSSLSocket.getSession();		
-			if (profile_util.isCustomSNILock()){
-				log("<b>" + b + " </b>"+ "Locked");
-			} else {
-				String peerHost = session.getPeerHost() + ":" + session.getPeerPort();
-				log("<b>" + b + " </b>" + peerHost);
-			}	
-            try {
-                String peerPrincipal = session.getPeerPrincipal().toString();
-                log("<b>" + c + "</b>" + peerPrincipal);
-            } catch (Exception e) {
-
-            }
-        } catch (Exception e2) {
-            throw new Exception("[SSLSocket] closed");
-        }
-		log(getString(R.string.state_start_ssl));
-    }
-    public void a(String str, Socket socket) throws Exception
-    {
-        int i = 0;
-        Random g;
-
-        OutputStream outputStream = socket.getOutputStream();
-        if (str.contains("[random]")) {
-            g = new Random();
-            String[] split = str.split(Pattern.quote("[random]"));
-            str = split[g.nextInt(split.length)];
-        }
-        if (str.contains("[repeat]")) {
-            String[] split = str.split(Pattern.quote("[repeat]"));
-            str = split[repeatCount];
-            repeatCount++;
-            if (repeatCount > split.length - 1) {
-                repeatCount= 0;
-            }
-        }
-        String str0 = str.replace("\r\n", "\\r\\n");
-		String k = getString(R.string.state_formatted_payload);
-        if (profile_util.isPayloadLock()){
-            log(k + " Locked");
-        } else {
-            log(k +" "+ str0);          
-        }
-        log(getString(R.string.state_sending_payload));
-        if (str.contains("[split_delay]")) {
-            String[] split = str.split(Pattern.quote("[split_delay]"));
-            int length = split.length;
-            while (i < length) {
-                String str2 = split[i];
-                if (a(str2, socket, outputStream)) {
-                    outputStream.write(str2.getBytes());
-                    outputStream.flush();
-                    Thread.sleep(1500);
-                }
-                i++;
-            }
-        } else if (str.contains("[split_instant]")) {
-            String[] split = str.split(Pattern.quote("[split_instant]"));
-            int length = split.length;
-            while (i < length) {
-                String str2 = split[i];
-                if (a(str2, socket, outputStream)) {
-                    outputStream.write(str2.getBytes());
-                    outputStream.flush();
-                    Thread.sleep(0);
-                }
-                i++;
-            }
-        } else if (str.contains("[instant_split]")) {
-            String[] split = str.split(Pattern.quote("[instant_split]"));
-            int length = split.length;
-            while (i < length) {
-                String str2 = split[i];
-                if (a(str2, socket, outputStream)) {
-                    outputStream.write(str2.getBytes());
-                    outputStream.flush();
-                    Thread.sleep(0);
-                }
-                i++;
-            }
-        } else  if (str.contains("[delay_split]")) {
-            String[] split = str.split(Pattern.quote("[delay_split]"));
-            int length = split.length;
-            while (i < length) {
-                String str2 = split[i];
-                if (a(str2, socket, outputStream)) {
-                    outputStream.write(str2.getBytes());
-                    outputStream.flush();
-                    Thread.sleep(1500);
-                }
-                i++;
-            }
-        } else if (a(str, socket, outputStream)) {
-            outputStream.write(str.getBytes());
-            outputStream.flush();
-        }
-		log(getString(R.string.state_injecting));
-    }
-    private boolean a(String str, Socket socket, OutputStream outputStream) throws Exception
-    {
-        if (!str.contains("[split]")) {
-            return true;
-        }
-        for (String str2 : str.split(Pattern.quote("[split]"))) {
-            outputStream.write(str2.getBytes());
-            outputStream.flush();
-        }
-        return false;
-    }
-    private String c(String str) {
-        String str2 = null;
-        if (str != null) {
-            try {
-                if (!str.equals("")) {
-                    String charSequence = str.split("\r\n")[0];
-                    String[] split = charSequence.split(" ");
-                    String[] split2 = split[1].split(":");
-                    String host = split2[0];
-                    String port = split2[1];
-                    str2 = d(config_util.getPayload().replace("[real_raw]", str).replace("[raw]", charSequence).replace("[method]", split[0]).replace("[host_port]", split[1]).replace("[host]", host).replace("[port]", port).replace("[protocol]", split[2]).replace("[cr]", "\r").replace("[lf]", "\n").replace("[crlf]", "\r\n").replace("[lfcr]", "\n\r").replace("\\r", "\r").replace("\\n", "\n"));
-                    return str2;
-                }
-            } catch (Exception e) {
-                log("Payload Error: "+ e.toString());
-            }
-        }
-        log("Payload Error: " + "Payload is null or empty");
-        return str2;
-    }
-    private String d(String str) {
-        if (str.contains("[cr*")) {
-            str = a(str, "[cr*", "\r");
-        }
-        if (str.contains("[lf*")) {
-            str = a(str, "[lf*", "\n");
-        }
-        if (str.contains("[crlf*")) {
-            str = a(str, "[crlf*", "\r\n");
-        }
-        return str.contains("[lfcr*") ? a(str, "[lfcr*", "\n\r") : str;
-    }
-    private String a(String str, String str2, String str3) {
-        while (str.contains(str2)) {
-            Matcher matcher = Pattern.compile("\\[.*?\\*(.*?[0-9])\\]").matcher(str);
-            if (matcher.find()) {
-                int intValue = Integer.valueOf(matcher.group(1)).intValue();
-                CharSequence charSequence = "";
-                for (int i = 0; i < intValue; i++) {
-                    charSequence = charSequence + str3;
-                }
-                str = str.replace(str2 + String.valueOf(intValue) + "]", charSequence);
-            }
-        }
-        return str;
-    }
-
-
     @Override
     public void run(){
-        try {
             log(String.format(getString(R.string.state_listening_port) + ": <b>%s</b>", Integer.toString(8989)));
             log(getString(R.string.state_listening));
-            ss = new ServerSocket(8989);
             mHandler.sendEmptyMessage(2);
-             if (mBackServerThread != null) {
-                    mBackServerThread.interrupt();
-             }
-            while (isRunning) {
-                mBackServerThread = new BackThread(this);
-                mBackServerThread.start();
-                client = ss.accept();
-                String SEND_BUFF = "16384";
-                String RECV_BUFF = "32768";   
-                log("Buffer Size: Send: " + SEND_BUFF + " | Receive: " + RECV_BUFF);    
-                log(getString(R.string.state_proxy_thread));
-                log(getString(R.string.state_proxy_thread));
-                if (client != null && !client.isClosed() && connectSocket()) {
-                    client.setKeepAlive(true);
-                   if (mSSLSocket != null && mSSLSocket.isConnected()) {
-                        doVpnProtect(mSSLSocket);
-                        mSSLSocket.setKeepAlive(true);
-                        server.setKeepAlive(true);
-                        ProxyThread.connect(client, mSSLSocket, SEND_BUFF, RECV_BUFF, false);
-                    } else if (server != null && server.isConnected()) {
-                        doVpnProtect(server);
-                        server.setKeepAlive(true);
-                        ProxyThread.connect(client, server, SEND_BUFF, RECV_BUFF, false);
-                    }
-                }
-            }
-        } catch (Exception e) {
-			log(e.getClass().getSimpleName() +": " +e.getMessage());
-        }
     }
-   private void send200Status() throws Exception{
-        OutputStream output = client.getOutputStream();
-        output.write("HTTP/1.0 200 Connection Established\r\n\r\n".getBytes());
-        output.flush();
-    }
-    public boolean doVpnProtect(Socket socket)
-    {
-        if (eVpnService == null)
-        {
-            eVpnService = new VpnService();
-        }
-        if (eVpnService.protect(socket)) {           
-            log(getString(R.string.state_socket_protect));
-            return true;
-        }      
-        return false;
-    }
-    
    public void log (String a){
         VPNLog.logInfo(a);
     }
     @Override
-    public boolean handleMessage(Message p1)
-    {
+    public boolean handleMessage(Message p1){
         switch (p1.what) {            
             case 2:
-                if (HomeFragment.start_ssh.isChecked()){
-                    startService(new Intent(this, SSHTunnelService.class).setAction("START_SSH"));
-                }            
+            startService(new Intent(this, SSHTunnelService.class).setAction("START_SSH"));           
             break;
         }
         return true;
