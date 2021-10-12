@@ -1,177 +1,72 @@
-package com.mycompany.myapp.service;
+package com.mycompany.myapp.fragment;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Context;
+import android.app.Fragment;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.VpnService;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Handler;
+import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
-import android.preference.PreferenceManager;
-import com.mycompany.myapp.R;
-import com.mycompany.myapp.activity.MainActivity;
-import com.mycompany.myapp.fragment.HomeFragment;
-import com.mycompany.myapp.logger.VPNLog;
-import com.mycompany.myapp.util.ConfigUtil;
-import com.mycompany.myapp.util.Utility;
-import java.net.Socket;
+import com.mycompany.myapp.model.ExceptionHandler;
+import com.mycompany.myapp.service.InjectorService;
+import com.mycompany.myapp.service.SSHTunnelService;
+import com.mycompany.myapp.model.StatusChangeListener;
 
-public class InjectorService extends Service implements Runnable, Handler.Callback 
+public abstract class BaseFragment extends Fragment implements StatusChangeListener
 {
-    public static final String NOTIFICATION_CHANNEL_ID = "Injector Service";
-    private Thread mThread;
-    private Handler mHandler;
-    public static boolean isRunning = false;
-    private SharedPreferences sp;
-    private ConfigUtil config_util;
-    private WakeLock wakeLock;
-    @Override
-    public IBinder onBind(Intent p1)
-    {
-        return new InjectorBinder();
-    }
-    public class InjectorBinder extends Binder
-    {
-        public InjectorService getService()
+    private InjectorService injector_service;
+    private SSHTunnelService ssh_tunnel;
+    private ServiceConnection injection_service = new ServiceConnection(){
+        @Override
+        public void onServiceConnected(ComponentName p1, IBinder p2)
         {
-            return InjectorService.this;
+            injector_service = ((InjectorService.InjectorBinder)p2).getService();
         }
-    }
-
-    @Override
-    public void onCreate(){
-        config_util = new ConfigUtil(this);
-        sp = PreferenceManager.getDefaultSharedPreferences(this);
-        super.onCreate();
-        
-    }
-    @Override
-    public void onStart(Intent intent, int startId){
-            String action = intent.getAction();
-        if (action.equals("START")) {
-            mThread = new Thread(this, "InjectorThread");
-            mHandler = new Handler(this);
-            if (config_util.setAutoLog()){
-            MainActivity.mPager.setCurrentItem(1);
-            }
-            log("<b>" + getString(R.string.state_injector_service_start) + "</b>");
-            log(getString(R.string.state_injector_start));
-            isRunning = true;
-            showNotification();
-            PowerManager powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(26, getString(R.string.app_name));            
-            if (HomeFragment.wake_lock.isChecked()){            
-                if (powerManager != null) {
-                    wakeLock.acquire();   
-                    log(getString(R.string.state_start_wakelock));           
-                }
-            }  
-            startInjector();
-            log(getString(R.string.state_local_ip) + ": " + Utility.getIpAddress());
-            HomeFragment.updateMainViews(this);  
+        @Override
+        public void onServiceDisconnected(ComponentName p1){
+            injector_service = null;
         }
-        super.onStart(intent, startId);
-    }
-
-    public void stopInjector(){
-        log("<b>"+ getString(R.string.state_injector_service_stop) + "</b>");
-        log(getString(R.string.state_injector_stop));
-        if (HomeFragment.wake_lock.isChecked()){            
-         if (wakeLock != null && wakeLock.isHeld()) {
-             wakeLock.release();
-			 log(getString(R.string.state_release_wakelock));
-         } 
-         } 
-        HomeFragment.updateMainViews(this);  
-        new Thread(new Runnable() {
-
-                @Override
-                public void run()
-                {
-                    closeAll();
-                    // TODO: Implement this method
-                }
-
-
-            }).start();
-        stopForeground(true);
-        isRunning = false;
-        // TODO: Implement this method
-    }
-    private void closeAll() {
-        try {
-            
-            if (mThread != null) {
-                mThread.interrupt();
-            }
-        } catch (Exception e) {
-
+    }; 
+    private ServiceConnection ssh_service = new ServiceConnection(){
+        @Override
+        public void onServiceConnected(ComponentName p1, IBinder p2){
+         ssh_tunnel = ((SSHTunnelService.SSHTunnelBinder)p2).getService();            
         }
-    }
-    private void showNotification()
+        @Override
+        public void onServiceDisconnected(ComponentName p1){
+         ssh_tunnel = null;
+            // TODO: Implement this method
+        }
+    };
+    protected void doBind()
     {
-        NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        Notification.Builder builder =  null;
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0,new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel(nm);
-            builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
-        } else if (Build.VERSION.SDK_INT >= 28) {
-            createNotificationChannel(nm);
-            builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
-        } else {
-            builder = new Notification.Builder(this);
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(getActivity()));
+        SSHTunnelService.addOnStatusChangedListener(this);
+        getActivity().bindService(new Intent(getActivity(), InjectorService.class), injection_service,getActivity().BIND_AUTO_CREATE);
+        getActivity().bindService(new Intent(getActivity(), SSHTunnelService.class), ssh_service,getActivity().BIND_AUTO_CREATE);
+    }
+    protected void doUnbind() {
+        SSHTunnelService.removeOnStatusChangedListener(this);
+        if (injector_service != null) {
+            getActivity().unbindService(injection_service);
+            injector_service = null;
         }
-        builder.setContentIntent(pIntent);
-        builder.setContentTitle(getString(R.string.app_name));
-        builder.setContentText(getString(R.string.running_foreground));
-        builder.setSmallIcon(R.drawable.ic_rocket_launch);
-        builder.setColor(getColor(R.color.colorPrimary));
-        Notification notif = builder.getNotification();
-        nm.notify(2, notif);
-        startForeground(2, notif);
-        // TODO: Implement this method
-    }
-
-    private void createNotificationChannel(NotificationManager nm)
-    {
-        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "Injector Service",NotificationManager.IMPORTANCE_DEFAULT);
-        channel.setShowBadge(true);
-        channel.setDescription("Injector Service is running");
-        nm.createNotificationChannel(channel);
-        // TODO: Implement this method
-    }
-    private void startInjector(){
-        if (mThread != null) {
-            mThread.interrupt();
+        if (ssh_tunnel != null) {
+            getActivity().unbindService(ssh_service);
+            ssh_tunnel = null;
         }
-        mThread.start();
+    }   
+    protected void startVPN(){
+        Intent intent = new Intent(getActivity(), InjectorService.class);
+        getActivity().startService(intent.setAction("START"));
     }
-    @Override
-    public void run(){
-            log(String.format(getString(R.string.state_listening_port) + ": <b>%s</b>", Integer.toString(8989)));
-            log(getString(R.string.state_listening));
-            mHandler.sendEmptyMessage(2);
-    }
-   public void log (String a){
-        VPNLog.logInfo(a);
-    }
-    @Override
-    public boolean handleMessage(Message p1){
-        switch (p1.what) {            
-            case 2:
-            startService(new Intent(this, SSHTunnelService.class).setAction("START_SSH"));           
-            break;
+    
+    protected void stopVPN(){
+        if (injector_service != null) {
+            injector_service.stopInjector();
         }
-        return true;
+        if (ssh_tunnel != null) {
+            ssh_tunnel.disconnectTunnel();
+			ssh_tunnel.onDisconnect();
+        }
     }
 }
