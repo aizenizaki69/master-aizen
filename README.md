@@ -1,3 +1,3 @@
 {
-"AppName":"SignTest_close"
+"AppName":"SignTest"
 }
